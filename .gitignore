@@ -22,6 +22,7 @@ backend/storage/framework/views/*
 backend/bootstrap/cache/*.php
 
 # Keep Laravel storage directories trackable when placeholders exist
+!backend/bootstrap/cache/.gitignore
 !backend/storage/logs/.gitignore
 !backend/storage/framework/cache/.gitignore
 !backend/storage/framework/sessions/.gitignore
