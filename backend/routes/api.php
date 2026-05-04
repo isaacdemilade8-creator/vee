@@ -27,6 +27,13 @@ use Illuminate\Support\Facades\Route;
 // PUBLIC ROUTES — No authentication required
 // ─────────────────────────────────────────────────────────────────────────────
 
+Route::get('/health', function () {
+    return response()->json([
+        'ok' => true,
+        'app' => config('app.name'),
+    ]);
+});
+
 Route::prefix('auth')->group(function () {
     // POST /api/auth/register  — Create a new account
     Route::post('/register', [AuthController::class, 'register']);
