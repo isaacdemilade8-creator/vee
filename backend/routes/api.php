@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\StoryController;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,7 +29,7 @@ use Illuminate\Support\Facades\Route;
 // ─────────────────────────────────────────────────────────────────────────────
 
 Route::get('/health', function () {
-    return response()->json([
+    return new JsonResponse([
         'ok' => true,
         'app' => config('app.name'),
     ]);
