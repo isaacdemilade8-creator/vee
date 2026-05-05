@@ -39,6 +39,8 @@ RUN mkdir -p \
     storage/framework/views \
     storage/logs
 
+RUN printf "upload_max_filesize=2048M\npost_max_size=2050M\nmemory_limit=1024M\nmax_execution_time=0\nmax_input_time=-1\nmax_file_uploads=50\n" > /usr/local/etc/php/conf.d/uploads.ini
+
 ENV APP_ENV=production
 ENV PORT=8080
 

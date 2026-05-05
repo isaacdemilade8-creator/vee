@@ -117,6 +117,7 @@ apiClient.interceptors.response.use(
 export const normalizeMediaUrl = (url) => {
   if (!url || typeof url !== 'string') return url;
   if (url.startsWith('/')) return `${API_ORIGIN}${url}`;
+  if (/^(media|storage)\//i.test(url)) return `${API_ORIGIN}/${url}`;
 
   try {
     const parsed = new URL(url);

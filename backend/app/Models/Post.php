@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MediaUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -91,11 +92,7 @@ class Post extends Model
      */
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) {
-            return null;
-        }
-
-        return url('storage/' . $this->image);
+        return MediaUrl::fromPublicDisk($this->image);
     }
 
     public function getMediaUrlAttribute(): ?string

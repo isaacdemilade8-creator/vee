@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MediaUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,8 +26,8 @@ class Story extends Model
         return $this->hasMany(StoryView::class);
     }
 
-    public function getMediaUrlAttribute(): string
+    public function getMediaUrlAttribute(): ?string
     {
-        return url('storage/' . $this->media);
+        return MediaUrl::fromPublicDisk($this->media);
     }
 }
