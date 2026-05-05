@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Services\MediaUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -144,12 +143,20 @@ class User extends Authenticatable
      */
     public function getAvatarUrlAttribute(): ?string
     {
-        return MediaUrl::fromPublicDisk($this->avatar);
+        if (!$this->avatar) {
+            return null;
+        }
+
+        return url('storage/' . $this->avatar);
     }
 
     public function getCoverPhotoUrlAttribute(): ?string
     {
-        return MediaUrl::fromPublicDisk($this->cover_photo);
+        if (!$this->cover_photo) {
+            return null;
+        }
+
+        return url('storage/' . $this->cover_photo);
     }
 
     /**

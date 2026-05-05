@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Services\MediaUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,6 +27,10 @@ class Story extends Model
 
     public function getMediaUrlAttribute(): ?string
     {
-        return MediaUrl::fromPublicDisk($this->media);
+        if (!$this->media) {
+            return null;
+        }
+
+        return url('storage/' . $this->media);
     }
 }
