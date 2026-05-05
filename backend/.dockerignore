@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+vendor
+node_modules
+npm-debug.log
+yarn-error.log
+storage/logs/*
+bootstrap/cache/*.php
