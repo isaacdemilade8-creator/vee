@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import { InboxAPI } from '../../api/services';
@@ -23,7 +24,9 @@ export default function InboxScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => { loadConversations(); }, [loadConversations]);
+  useFocusEffect(useCallback(() => {
+    loadConversations();
+  }, [loadConversations]));
 
   const refresh = () => {
     setRefreshing(true);

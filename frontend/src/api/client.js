@@ -16,8 +16,9 @@ import { Platform } from 'react-native';
 // CONFIG — Change this to your Laravel server's IP/domain
 // Use your machine's LAN IP when testing on a physical device (not localhost)
 // ─────────────────────────────────────────────────────────────────────────────
-export const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || 'http://192.168.8.123:8003/api';
+const DEFAULT_PUBLIC_API_URL = 'https://vee-production-76c2.up.railway.app/api';
+
+export const BASE_URL = (process.env.EXPO_PUBLIC_API_URL || DEFAULT_PUBLIC_API_URL).replace(/\/$/, '');
 
 const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 
@@ -88,6 +89,12 @@ export const setUnauthorizedCallback = (callback) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (!error.response && error.config) {
+      const method = (error.config.method || 'GET').toUpperCase();
+      const url = `${error.config.baseURL || ''}${error.config.url || ''}`;
+      error.message = `Network Error: ${method} ${url}`;
+    }
+
     if (error.response?.status === 401 && _onUnauthorized) {
       _onUnauthorized();
     }
@@ -177,9 +184,9 @@ export const buildFormData = (mediaInput, extraFields = {}, options = {}) => {
 export const uploadMultipart = async (path, mediaInput, extraFields = {}, options = {}) => {
   const mediaUri = typeof mediaInput === 'string' ? mediaInput : mediaInput?.uri;
   const fieldName = options.fieldName || 'media';
+  const formData = buildFormData(mediaInput, extraFields, options);
 
   if (!mediaUri || Platform.OS === 'web') {
-    const formData = buildFormData(mediaInput, extraFields, options);
     return apiClient.post(path, formData);
   }
 
@@ -193,17 +200,23 @@ export const uploadMultipart = async (path, mediaInput, extraFields = {}, option
     }
   });
 
-  const uploadResult = await FileSystem.uploadAsync(`${BASE_URL}${path}`, mediaUri, {
-    fieldName,
-    httpMethod: 'POST',
-    mimeType: typeof mediaInput === 'object' ? mediaInput?.mimeType : undefined,
-    uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-    parameters,
-    headers: {
-      Accept: 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+  let uploadResult;
+
+  try {
+    uploadResult = await FileSystem.uploadAsync(`${BASE_URL}${path}`, mediaUri, {
+      fieldName,
+      httpMethod: 'POST',
+      mimeType: typeof mediaInput === 'object' ? mediaInput?.mimeType : undefined,
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      parameters,
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+  } catch (nativeUploadError) {
+    return apiClient.post(path, formData);
+  }
 
   let data = uploadResult.body;
   try {

@@ -5,8 +5,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet,
-  Image, Text, TouchableOpacity, View,
+  Image, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
@@ -23,7 +24,7 @@ const TABS = [
 ];
 
 export default function ProfileScreen({ navigation }) {
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, refreshUser, updateUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [reposts, setReposts] = useState([]);
   const [activeTab, setActiveTab] = useState('posts');
@@ -58,7 +59,14 @@ export default function ProfileScreen({ navigation }) {
     }
   }, [user?.username]);
 
-  useEffect(() => { loadProfileContent(); }, [loadProfileContent]);
+  useEffect(() => {
+    setBio(user?.bio || '');
+    setFullName(user?.full_name || '');
+  }, [user?.bio, user?.full_name]);
+
+  useFocusEffect(useCallback(() => {
+    loadProfileContent();
+  }, [loadProfileContent]));
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -77,8 +85,9 @@ export default function ProfileScreen({ navigation }) {
     if (!result.canceled && result.assets?.[0]) {
       setSaving(true);
       try {
-        const res = await UserAPI.updateProfile({}, result.assets[0]);
-        updateUser(res.data.user);
+        await UserAPI.updateProfile({}, result.assets[0]);
+        const refreshedUser = await refreshUser();
+        updateUser(refreshedUser);
         Alert.alert('Success', 'Profile photo updated.');
       } catch (err) {
         Alert.alert('Error', err.response?.data?.message || err.message || 'Failed to update photo.');
@@ -100,8 +109,9 @@ export default function ProfileScreen({ navigation }) {
     if (!result.canceled && result.assets?.[0]) {
       setSaving(true);
       try {
-        const res = await UserAPI.updateProfile({}, null, result.assets[0]);
-        updateUser(res.data.user);
+        await UserAPI.updateProfile({}, null, result.assets[0]);
+        const refreshedUser = await refreshUser();
+        updateUser(refreshedUser);
         Alert.alert('Success', 'Cover photo updated.');
       } catch (err) {
         Alert.alert('Error', err.response?.data?.message || err.message || 'Failed to update cover photo.');
@@ -131,10 +141,17 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const handleSaveProfile = async () => {
+    if (bio === (user?.bio || '') && fullName === (user?.full_name || '')) {
+      Alert.alert('No changes', 'Update your name or bio first.');
+      return;
+    }
+
     setSaving(true);
     try {
-      const res = await UserAPI.updateProfile({ bio, full_name: fullName });
-      updateUser(res.data.user);
+      await UserAPI.updateProfile({ bio, full_name: fullName });
+      const refreshedUser = await refreshUser();
+      updateUser(refreshedUser);
+      await loadProfileContent();
       setEditMode(false);
       Alert.alert('Saved', 'Profile updated.');
     } catch (err) {
@@ -185,6 +202,27 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.name}>{user?.full_name || user?.username}</Text>
         <Text style={styles.handle}>@{user?.username}</Text>
         {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
+
+        {editMode ? (
+          <View style={styles.editFields}>
+            <TextInput
+              style={styles.input}
+              value={fullName}
+              onChangeText={setFullName}
+              placeholder="Full name"
+              placeholderTextColor={Colors.textSecondary}
+            />
+            <TextInput
+              style={[styles.input, styles.bioInput]}
+              value={bio}
+              onChangeText={setBio}
+              placeholder="Bio"
+              placeholderTextColor={Colors.textSecondary}
+              multiline
+              textAlignVertical="top"
+            />
+          </View>
+        ) : null}
 
         <View style={styles.statsRow}>
           <Text style={styles.statText}><Text style={styles.statValue}>{posts.length}</Text> Posts</Text>
@@ -280,6 +318,9 @@ const styles = StyleSheet.create({
   name: { color: Colors.textPrimary, fontSize: Typography.xl, fontWeight: '800', marginTop: Spacing.sm },
   handle: { color: Colors.textSecondary, fontSize: Typography.sm, marginTop: 2 },
   bio: { color: Colors.textPrimary, fontSize: Typography.sm, lineHeight: 19, marginTop: Spacing.md },
+  editFields: { marginTop: Spacing.md, gap: Spacing.sm },
+  input: { borderWidth: 1, borderColor: Colors.border, borderRadius: BorderRadius.md, paddingHorizontal: Spacing.md, paddingVertical: 10, color: Colors.textPrimary, fontSize: Typography.sm, backgroundColor: Colors.white },
+  bioInput: { minHeight: 86 },
   statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, marginTop: Spacing.md },
   statText: { color: Colors.textSecondary, fontSize: Typography.sm },
   statValue: { color: Colors.textPrimary, fontWeight: '800' },

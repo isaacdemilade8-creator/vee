@@ -2,11 +2,12 @@
  * screens/main/UserProfileScreen.js
  * Public profile with posts, media, and repost tabs.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet,
   Image, Text, TouchableOpacity, View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { FollowAPI, InboxAPI, StoryAPI, UserAPI } from '../../api/services';
 import { normalizeMediaUrl } from '../../api/client';
@@ -57,7 +58,9 @@ export default function UserProfileScreen({ route, navigation }) {
     }
   }, [username]);
 
-  useEffect(() => { loadProfile(); }, [loadProfile]);
+  useFocusEffect(useCallback(() => {
+    loadProfile();
+  }, [loadProfile]));
 
   const handleRefresh = () => {
     setRefreshing(true);

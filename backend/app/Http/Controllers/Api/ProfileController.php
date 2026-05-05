@@ -85,6 +85,12 @@ class ProfileController extends Controller
             $data['cover_photo'] = $path;
         }
 
+        if (empty($data)) {
+            return response()->json([
+                'message' => 'Nothing to update.',
+            ], 422);
+        }
+
         $user->update($data);
 
         return response()->json([

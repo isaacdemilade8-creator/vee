@@ -53,8 +53,7 @@ export function AuthProvider({ children }) {
       if (savedToken) {
         setToken(savedToken);
         // Validate the token is still valid by fetching the user
-        const res = await AuthAPI.me();
-        setUser(res.data.user);
+        await refreshUser();
       }
     } catch (err) {
       // Token is invalid or expired — clear it
@@ -65,6 +64,12 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   };
+
+  const refreshUser = useCallback(async () => {
+    const res = await AuthAPI.me();
+    setUser(res.data.user);
+    return res.data.user;
+  }, []);
 
   /**
    * Register a new account and log in automatically.
@@ -149,6 +154,7 @@ export function AuthProvider({ children }) {
     register,
     login,
     logout,
+    refreshUser,
     updateUser,
   };
 

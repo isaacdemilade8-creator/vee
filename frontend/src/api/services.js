@@ -6,7 +6,7 @@
  * Error handling is done in the calling component/context.
  */
 
-import apiClient, { buildFormData, uploadMultipart } from './client';
+import apiClient, { uploadMultipart } from './client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTH SERVICES
@@ -113,9 +113,32 @@ export const UserAPI = {
    */
   updateProfile: (data, avatar = null, coverPhoto = null) => {
     if (avatar || coverPhoto) {
-      let formData = null;
+      if (avatar?.uri && !coverPhoto) {
+        return uploadMultipart('/profile', avatar, data, { fieldName: 'avatar', mediaType: 'image' });
+      }
+
+      if (coverPhoto?.uri && !avatar) {
+        return uploadMultipart('/profile', coverPhoto, data, { fieldName: 'cover_photo', mediaType: 'image' });
+      }
+
+      const formData = new FormData();
+
+      Object.entries(data || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value);
+        }
+      });
+
+      if (avatar?.uri) {
+        const extension = (avatar.uri.split('?')[0].match(/\.([a-zA-Z0-9]+)$/)?.[1] || 'jpg').toLowerCase();
+        formData.append('avatar', {
+          uri: avatar.uri,
+          name: avatar.fileName || `avatar.${extension}`,
+          type: avatar.mimeType || `image/${extension === 'jpg' ? 'jpeg' : extension}`,
+        });
+      }
+
       if (coverPhoto?.uri) {
-        formData = buildFormData(avatar, data, { fieldName: 'avatar', mediaType: 'image' });
         const extension = (coverPhoto.uri.split('?')[0].match(/\.([a-zA-Z0-9]+)$/)?.[1] || 'jpg').toLowerCase();
         formData.append('cover_photo', {
           uri: coverPhoto.uri,
@@ -123,9 +146,7 @@ export const UserAPI = {
           type: coverPhoto.mimeType || `image/${extension === 'jpg' ? 'jpeg' : extension}`,
         });
       }
-      if (avatar && !coverPhoto) {
-        return uploadMultipart('/profile', avatar, data, { fieldName: 'avatar', mediaType: 'image' });
-      }
+
       return apiClient.post('/profile', formData);
     }
     // No avatar change — use JSON

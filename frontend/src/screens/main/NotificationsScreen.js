@@ -2,10 +2,11 @@
  * screens/main/NotificationsScreen.js
  * In-app notifications for likes, comments, follows.
  */
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl,
+  View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePaginatedApi } from '../../hooks/useApi';
 import { NotificationAPI } from '../../api/services';
@@ -21,7 +22,9 @@ const ICON_MAP = {
 export default function NotificationsScreen() {
   const { items, loading, refreshing, loadMore, refresh } = usePaginatedApi(NotificationAPI.getAll);
 
-  useEffect(() => { refresh(); }, []);
+  useFocusEffect(useCallback(() => {
+    refresh();
+  }, [refresh]));
 
   const renderItem = ({ item }) => {
     const icon = ICON_MAP[item.data?.type] || { name: 'notifications', color: Colors.primary };

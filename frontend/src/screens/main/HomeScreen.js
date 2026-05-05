@@ -2,10 +2,11 @@
  * screens/main/HomeScreen.js
  * The main feed - shows posts from followed users (or all posts as fallback).
  */
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   FlatList, StyleSheet, RefreshControl, View, Text, ActivityIndicator,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PostCard from '../../components/post/PostCard';
 import StoriesBar from '../../components/story/StoriesBar';
@@ -28,7 +29,10 @@ export default function HomeScreen({ navigation }) {
     } catch { /* keep feed usable */ }
   }, []);
 
-  useEffect(() => { refresh(); loadStories(); }, [loadStories]);
+  useFocusEffect(useCallback(() => {
+    refresh();
+    loadStories();
+  }, [refresh, loadStories]));
 
   const refreshAll = useCallback(() => {
     refresh();
