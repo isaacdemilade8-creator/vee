@@ -24,15 +24,14 @@ Route::get('/storage/{path}', function (string $path) {
     }
 
     $basePath = storage_path('app/public');
-    $absolutePath = $basePath . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
-    $realBasePath = realpath($basePath);
-    $realPath = realpath($absolutePath);
+    $normalizedPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+    $absolutePath = $basePath . DIRECTORY_SEPARATOR . $normalizedPath;
 
-    if (!$realBasePath || !$realPath || !str_starts_with($realPath, $realBasePath) || !is_file($realPath)) {
+    if (!is_file($absolutePath)) {
         abort(404);
     }
 
-    $extension = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
+    $extension = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
     $mimeTypes = [
         'jpg' => 'image/jpeg',
         'jpeg' => 'image/jpeg',
@@ -46,10 +45,10 @@ Route::get('/storage/{path}', function (string $path) {
         'wav' => 'audio/wav',
     ];
     $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
-    $fileSize = filesize($realPath);
+    $fileSize = filesize($absolutePath);
 
-    return response()->stream(function () use ($realPath) {
-        $handle = fopen($realPath, 'rb');
+    return response()->stream(function () use ($absolutePath) {
+        $handle = fopen($absolutePath, 'rb');
         if ($handle === false) {
             return;
         }
