@@ -19,7 +19,6 @@ if [ "$VOLUME_STORAGE" != "$APP_PUBLIC_STORAGE" ]; then
 fi
 
 rm -rf public/storage
-ln -snf "$APP_PUBLIC_STORAGE" public/storage
 
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   php artisan migrate --force

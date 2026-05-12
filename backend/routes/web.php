@@ -30,8 +30,21 @@ Route::get('/storage/{path}', function (string $path) {
         abort(404);
     }
 
-    return response()->file($disk->path($path), [
-        'Content-Type' => $disk->mimeType($path) ?: 'application/octet-stream',
+    $absolutePath = $disk->path($path);
+    $mimeType = $disk->mimeType($path) ?: 'application/octet-stream';
+    $fileSize = $disk->size($path);
+
+    return response()->stream(function () use ($absolutePath) {
+        $handle = fopen($absolutePath, 'rb');
+        if ($handle === false) {
+            return;
+        }
+
+        fpassthru($handle);
+        fclose($handle);
+    }, 200, [
+        'Content-Length' => (string) $fileSize,
+        'Content-Type' => $mimeType,
         'Cache-Control' => 'public, max-age=31536000',
     ]);
 })->where('path', '.*');
