@@ -31,6 +31,6 @@ class Story extends Model
             return null;
         }
 
-        return url('storage/' . $this->media);
+        return url('/api/media') . '?path=' . rawurlencode($this->media);
     }
 }

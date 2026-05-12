@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\StoryController;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,6 +34,48 @@ Route::get('/health', function () {
     return new JsonResponse([
         'ok' => true,
         'app' => config('app.name'),
+    ]);
+});
+
+Route::get('/media', function (Request $request) {
+    $path = ltrim((string) $request->query('path', ''), '/');
+
+    if ($path === '' || str_contains($path, '..') || str_starts_with($path, '/')) {
+        abort(404);
+    }
+
+    $absolutePath = storage_path('app/public') . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+
+    if (!is_file($absolutePath)) {
+        abort(404);
+    }
+
+    $extension = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+        'mp4' => 'video/mp4',
+        'mov' => 'video/quicktime',
+        'm4a' => 'audio/mp4',
+        'mp3' => 'audio/mpeg',
+        'wav' => 'audio/wav',
+    ];
+
+    return response()->stream(function () use ($absolutePath) {
+        $handle = fopen($absolutePath, 'rb');
+        if ($handle === false) {
+            return;
+        }
+
+        fpassthru($handle);
+        fclose($handle);
+    }, 200, [
+        'Content-Length' => (string) filesize($absolutePath),
+        'Content-Type' => $mimeTypes[$extension] ?? 'application/octet-stream',
+        'Cache-Control' => 'public, max-age=31536000',
     ]);
 });
 

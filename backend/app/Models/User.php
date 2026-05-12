@@ -152,7 +152,7 @@ class User extends Authenticatable
             return null;
         }
 
-        return url('storage/' . $this->avatar);
+        return url('/api/media') . '?path=' . rawurlencode($this->avatar);
     }
 
     public function getCoverPhotoUrlAttribute(): ?string
@@ -161,7 +161,7 @@ class User extends Authenticatable
             return null;
         }
 
-        return url('storage/' . $this->cover_photo);
+        return url('/api/media') . '?path=' . rawurlencode($this->cover_photo);
     }
 
     /**

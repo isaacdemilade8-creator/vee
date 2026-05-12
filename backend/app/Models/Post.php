@@ -95,7 +95,7 @@ class Post extends Model
             return null;
         }
 
-        return url('storage/' . $this->image);
+        return url('/api/media') . '?path=' . rawurlencode($this->image);
     }
 
     public function getMediaUrlAttribute(): ?string
