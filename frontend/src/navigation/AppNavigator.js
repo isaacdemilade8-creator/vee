@@ -24,6 +24,7 @@ import ChatScreen from '../screens/main/ChatScreen';
 import StoryViewerScreen from '../screens/main/StoryViewerScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import PostAnalyticsScreen from '../screens/main/PostAnalyticsScreen';
+import LiveScreen from '../screens/main/LiveScreen';
 import { Image } from 'react-native';
 
 const Stack = createNativeStackNavigator();
@@ -59,6 +60,13 @@ function HomeStack() {
             <View style={styles.headerActions}>
               <TouchableOpacity
                 style={[styles.headerIcon, { backgroundColor: colors.background, borderColor: colors.border }]}
+                onPress={() => navigation.navigate('Live')}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="radio-outline" size={20} color={colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.headerIcon, { backgroundColor: colors.background, borderColor: colors.border }]}
                 onPress={() => navigation.getParent()?.navigate('SearchTab', { screen: 'Search' })}
                 activeOpacity={0.85}
               >
@@ -79,6 +87,7 @@ function HomeStack() {
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
       <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ headerShown: false }} />
       <Stack.Screen name="PostAnalytics" component={PostAnalyticsScreen} options={{ title: 'Post analytics' }} />
+      <Stack.Screen name="Live" component={LiveScreen} options={{ title: 'Live' }} />
     </Stack.Navigator>
   );
 }

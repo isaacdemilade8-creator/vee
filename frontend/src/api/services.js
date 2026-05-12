@@ -219,6 +219,13 @@ export const StoryAPI = {
   getUserStories: (username) => apiClient.get(`/users/${username}/stories`),
 };
 
+export const LiveAPI = {
+  getActive: () => apiClient.get('/live-streams'),
+  start: (title = null) => apiClient.post('/live-streams', { title }),
+  join: (streamId) => apiClient.post(`/live-streams/${streamId}/join`),
+  end: (streamId) => apiClient.post(`/live-streams/${streamId}/end`),
+};
+
 export const DiscoveryAPI = {
   categories: () => apiClient.get('/discover/categories'),
   search: (query, page = 1) => apiClient.get(`/discover/search?q=${encodeURIComponent(query)}&page=${page}`),

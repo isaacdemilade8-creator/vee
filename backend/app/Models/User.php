@@ -116,6 +116,11 @@ class User extends Authenticatable
         return $this->hasMany(Story::class);
     }
 
+    public function liveStreams()
+    {
+        return $this->hasMany(LiveStream::class);
+    }
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');

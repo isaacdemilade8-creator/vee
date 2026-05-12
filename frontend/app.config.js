@@ -47,6 +47,7 @@ module.exports = {
       infoPlist: {
         NSPhotoLibraryUsageDescription: 'Allow Vee to access your photos to share them.',
         NSCameraUsageDescription: 'Allow Vee to use your camera to take photos.',
+        NSMicrophoneUsageDescription: 'Allow Vee to use your microphone for live streams.',
       },
     },
     android: {
@@ -56,7 +57,7 @@ module.exports = {
       },
       package: 'com.vee.app',
       softwareKeyboardLayoutMode: 'resize',
-      permissions: ['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE', 'CAMERA'],
+      permissions: ['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE', 'CAMERA', 'RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS'],
     },
     web: {
       favicon: './src/assets/v.png',
@@ -68,6 +69,15 @@ module.exports = {
           photosPermission: 'Allow Vee to access your photos.',
         },
       ],
+      [
+        '@livekit/react-native-expo-plugin',
+        {
+          android: {
+            audioType: 'communication',
+          },
+        },
+      ],
+      '@config-plugins/react-native-webrtc',
       'expo-video',
       'expo-audio',
     ],

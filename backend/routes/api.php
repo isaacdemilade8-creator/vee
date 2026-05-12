@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DiscoveryController;
 use App\Http\Controllers\Api\FollowController;
 use App\Http\Controllers\Api\InboxController;
 use App\Http\Controllers\Api\LikeController;
+use App\Http\Controllers\Api\LiveStreamController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProfileController;
@@ -104,6 +105,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{username}/stories', [StoryController::class, 'userStories']);
     Route::post('/stories/{story}/view', [StoryController::class, 'view']);
     Route::delete('/stories/{story}', [StoryController::class, 'destroy']);
+
+    Route::get('/live-streams', [LiveStreamController::class, 'index']);
+    Route::post('/live-streams', [LiveStreamController::class, 'start']);
+    Route::post('/live-streams/{liveStream}/join', [LiveStreamController::class, 'join']);
+    Route::post('/live-streams/{liveStream}/end', [LiveStreamController::class, 'end']);
 
     Route::get('/discover/categories', [DiscoveryController::class, 'categories']);
     Route::get('/discover/search', [DiscoveryController::class, 'search']);
