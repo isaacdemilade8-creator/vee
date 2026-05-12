@@ -3,12 +3,13 @@
  */
 import React from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
-import { Colors } from '../../utils/theme';
+import { useAppTheme } from '../../utils/theme';
 
 export default function LoadingSpinner({ size = 'large', style }) {
+  const { colors } = useAppTheme();
   return (
-    <View style={[styles.container, style]}>
-      <ActivityIndicator size={size} color={Colors.primary} />
+    <View style={[styles.container, { backgroundColor: colors.background }, style]}>
+      <ActivityIndicator size={size} color={colors.primary} />
     </View>
   );
 }

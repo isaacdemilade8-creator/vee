@@ -13,7 +13,7 @@ import { FollowAPI, InboxAPI, StoryAPI, UserAPI } from '../../api/services';
 import { normalizeMediaUrl } from '../../api/client';
 import Avatar from '../../components/common/Avatar';
 import PostCard from '../../components/post/PostCard';
-import { BorderRadius, Colors, Spacing, Typography } from '../../utils/theme';
+import { BorderRadius, Colors, Spacing, Typography, useAppTheme } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 
 const TABS = [
@@ -25,6 +25,7 @@ const TABS = [
 export default function UserProfileScreen({ route, navigation }) {
   const { username } = route.params;
   const { user: authUser } = useAuth();
+  const { colors } = useAppTheme();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [reposts, setReposts] = useState([]);
@@ -117,15 +118,15 @@ export default function UserProfileScreen({ route, navigation }) {
   }, []);
 
   if (loading && !profile) {
-    return <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />;
+    return <ActivityIndicator size="large" color={colors.primary} style={[styles.loader, { backgroundColor: colors.background }]} />;
   }
   if (!profile) return null;
 
   const isOwnProfile = authUser?.username === profile.username;
 
   const Header = () => (
-    <View style={styles.headerWrap}>
-      <View style={styles.cover}>
+    <View style={[styles.headerWrap, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <View style={[styles.cover, { backgroundColor: colors.surfaceMuted || '#18212F' }]}>
         {profile.cover_photo_url ? (
           <Image source={{ uri: normalizeMediaUrl(profile.cover_photo_url) }} style={styles.coverImage} />
         ) : null}
@@ -133,45 +134,45 @@ export default function UserProfileScreen({ route, navigation }) {
       <View style={styles.profileHeader}>
         <View style={styles.identityRow}>
           <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.85}>
-            <View style={[styles.avatarStoryRing, profile.has_active_story && styles.avatarStoryRingActive]}>
+            <View style={[styles.avatarStoryRing, { backgroundColor: colors.surface, borderColor: colors.surface }, profile.has_active_story && { borderColor: colors.primary }]}>
               <Avatar uri={profile.avatar_url} username={profile.username} size={88} />
             </View>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.name}>{profile.full_name || profile.username}</Text>
-        <Text style={styles.handle}>@{profile.username}</Text>
-        {profile.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
+        <Text style={[styles.name, { color: colors.textPrimary }]}>{profile.full_name || profile.username}</Text>
+        <Text style={[styles.handle, { color: colors.textSecondary }]}>@{profile.username}</Text>
+        {profile.bio ? <Text style={[styles.bio, { color: colors.textPrimary }]}>{profile.bio}</Text> : null}
 
         <View style={styles.statsRow}>
-          <Text style={styles.statText}><Text style={styles.statValue}>{posts.length}</Text> Posts</Text>
-          <Text style={styles.statText}><Text style={styles.statValue}>{profile.followers_count}</Text> Followers</Text>
-          <Text style={styles.statText}><Text style={styles.statValue}>{profile.following_count}</Text> Following</Text>
+          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{posts.length}</Text> Posts</Text>
+          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{profile.followers_count}</Text> Followers</Text>
+          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{profile.following_count}</Text> Following</Text>
         </View>
 
         {!isOwnProfile ? (
           <View style={styles.profileActions}>
             <TouchableOpacity
-              style={[styles.followBtn, profile.is_following && styles.followingBtn]}
+              style={[styles.followBtn, profile.is_following && [styles.followingBtn, { backgroundColor: colors.surface, borderColor: colors.border }]]}
               onPress={handleFollow}
               disabled={followLoading}
               activeOpacity={0.85}
             >
               {followLoading
-                ? <ActivityIndicator size="small" color={profile.is_following ? Colors.textPrimary : Colors.white} />
-                : <Text style={[styles.followBtnText, profile.is_following && styles.followingBtnText]}>
+                ? <ActivityIndicator size="small" color={profile.is_following ? colors.textPrimary : Colors.white} />
+                : <Text style={[styles.followBtnText, profile.is_following && [styles.followingBtnText, { color: colors.textPrimary }]]}>
                     {profile.is_following ? 'Following' : 'Follow'}
                   </Text>}
             </TouchableOpacity>
-            <TouchableOpacity style={styles.messageBtn} onPress={handleMessage} activeOpacity={0.85}>
-              <Ionicons name="paper-plane-outline" size={18} color={Colors.textPrimary} />
-              <Text style={styles.messageBtnText}>Message</Text>
+            <TouchableOpacity style={[styles.messageBtn, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={handleMessage} activeOpacity={0.85}>
+              <Ionicons name="paper-plane-outline" size={18} color={colors.textPrimary} />
+              <Text style={[styles.messageBtnText, { color: colors.textPrimary }]}>Message</Text>
             </TouchableOpacity>
           </View>
         ) : null}
       </View>
 
-      <View style={styles.tabs}>
+      <View style={[styles.tabs, { borderTopColor: colors.border }]}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.key}
@@ -179,7 +180,7 @@ export default function UserProfileScreen({ route, navigation }) {
             onPress={() => setActiveTab(tab.key)}
             activeOpacity={0.85}
           >
-            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === tab.key && [styles.tabTextActive, { color: colors.textPrimary }]]}>{tab.label}</Text>
             {activeTab === tab.key ? <View style={styles.tabIndicator} /> : null}
           </TouchableOpacity>
         ))}
@@ -194,25 +195,25 @@ export default function UserProfileScreen({ route, navigation }) {
       renderItem={({ item }) => (
         <View>
           {activeTab === 'reposts' ? (
-            <View style={styles.repostLabel}>
-              <Ionicons name="repeat" size={14} color={Colors.textSecondary} />
-              <Text style={styles.repostText}>{profile.username} reposted</Text>
+            <View style={[styles.repostLabel, { backgroundColor: colors.surface }]}>
+              <Ionicons name="repeat" size={14} color={colors.textSecondary} />
+              <Text style={[styles.repostText, { color: colors.textSecondary }]}>{profile.username} reposted</Text>
             </View>
           ) : null}
           <PostCard post={item} navigation={navigation} onDelete={handleDelete} />
         </View>
       )}
       ListHeaderComponent={<Header />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
       ListEmptyComponent={
         <View style={styles.empty}>
-          <Ionicons name={activeTab === 'media' ? 'images-outline' : activeTab === 'reposts' ? 'repeat-outline' : 'chatbubble-ellipses-outline'} size={42} color={Colors.textTertiary} />
-          <Text style={styles.emptyText}>
+          <Ionicons name={activeTab === 'media' ? 'images-outline' : activeTab === 'reposts' ? 'repeat-outline' : 'chatbubble-ellipses-outline'} size={42} color={colors.textTertiary} />
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             {activeTab === 'media' ? 'No photo or video posts yet' : activeTab === 'reposts' ? 'No reposts yet' : 'No posts yet'}
           </Text>
         </View>
       }
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     />
   );
 }

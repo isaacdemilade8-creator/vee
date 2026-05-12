@@ -8,17 +8,20 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { Ionicons } from '@expo/vector-icons';
 import Avatar from '../../components/common/Avatar';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import { CommentAPI } from '../../api/services';
 import { formatDistanceToNow } from '../../utils/dateUtils';
-import { Colors, Typography, Spacing, BorderRadius } from '../../utils/theme';
+import { Colors, Typography, Spacing, BorderRadius, useAppTheme } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 
 export default function CommentsScreen({ route }) {
   const { postId } = route.params;
   const { user } = useAuth();
+  const headerHeight = useHeaderHeight();
+  const { colors } = useAppTheme();
   const [comments, setComments] = useState([]);
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(true);
@@ -65,12 +68,12 @@ export default function CommentsScreen({ route }) {
     <View style={styles.comment}>
       <ProfileAvatar user={item.user} size={36} />
       <View style={styles.commentContent}>
-        <View style={styles.commentBubble}>
-          <Text style={styles.commentUsername}>{item.user?.username}</Text>
-          <Text style={styles.commentBody}>{item.body}</Text>
+        <View style={[styles.commentBubble, { backgroundColor: colors.background }]}>
+          <Text style={[styles.commentUsername, { color: colors.textPrimary }]}>{item.user?.username}</Text>
+          <Text style={[styles.commentBody, { color: colors.textPrimary }]}>{item.body}</Text>
         </View>
         <View style={styles.commentMeta}>
-          <Text style={styles.commentTime}>{formatDistanceToNow(item.created_at)}</Text>
+          <Text style={[styles.commentTime, { color: colors.textSecondary }]}>{formatDistanceToNow(item.created_at)}</Text>
           {item.is_owner && (
             <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ marginLeft: 12 }}>
               <Text style={styles.deleteBtn}>Delete</Text>
@@ -82,8 +85,12 @@ export default function CommentsScreen({ route }) {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom"]}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]} edges={["bottom"]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
+      >
         {loading
           ? <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />
           : (
@@ -92,20 +99,22 @@ export default function CommentsScreen({ route }) {
               keyExtractor={(item) => String(item.id)}
               renderItem={renderComment}
               contentContainerStyle={styles.list}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
               ListEmptyComponent={
                 <View style={styles.empty}>
-                  <Text style={styles.emptyText}>No comments yet. Be the first!</Text>
+                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No comments yet. Be the first!</Text>
                 </View>
               }
             />
           )}
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
           <Avatar uri={user?.avatar_url} username={user?.username} size={32} />
           <TextInput
             ref={inputRef}
-            style={styles.input}
+            style={[styles.input, { color: colors.textPrimary }]}
             placeholder="Add a comment..."
-            placeholderTextColor={Colors.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             value={body}
             onChangeText={setBody}
             multiline

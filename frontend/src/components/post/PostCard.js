@@ -15,13 +15,14 @@ import { formatDistanceToNow } from '../../utils/dateUtils';
 import MediaView from '../common/MediaView';
 import ProfileAvatar from '../common/ProfileAvatar';
 import { LikeAPI, PostAPI } from '../../api/services';
-import { Colors, Typography, Spacing } from '../../utils/theme';
+import { Colors, Typography, Spacing, useAppTheme } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 function PostCard({ post, navigation, onDelete }) {
   const { user: authUser } = useAuth();
+  const { colors } = useAppTheme();
   const [liked, setLiked] = useState(post.is_liked);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [reposted, setReposted] = useState(post.is_reposted);
@@ -142,40 +143,40 @@ function PostCard({ post, navigation, onDelete }) {
   const isPollPost = post.post_type === 'poll' || post.media_type === 'poll';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
           <ProfileAvatar user={post.user} size={36} style={styles.avatarTap} />
           <TouchableOpacity style={styles.userText} onPress={navigateToProfile} activeOpacity={0.8}>
-            <Text style={styles.username}>{post.user?.username}</Text>
-            <Text style={styles.time}>{formatDistanceToNow(post.created_at)}</Text>
+            <Text style={[styles.username, { color: colors.textPrimary }]}>{post.user?.username}</Text>
+            <Text style={[styles.time, { color: colors.textSecondary }]}>{formatDistanceToNow(post.created_at)}</Text>
           </TouchableOpacity>
         </View>
         {post.is_owner && (
           <TouchableOpacity onPress={handleDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="ellipsis-horizontal" size={20} color={Colors.textSecondary} />
+            <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
 
       {isTextPost ? (
-        <View style={styles.textPost}>
-          <Text style={styles.textPostBody}>{post.caption}</Text>
+        <View style={[styles.textPost, { backgroundColor: colors.background }]}>
+          <Text style={[styles.textPostBody, { color: colors.textPrimary }]}>{post.caption}</Text>
         </View>
       ) : isPollPost ? (
-        <View style={styles.pollPost}>
-          <Text style={styles.pollQuestion}>{post.caption}</Text>
+        <View style={[styles.pollPost, { backgroundColor: colors.background }]}>
+          <Text style={[styles.pollQuestion, { color: colors.textPrimary }]}>{post.caption}</Text>
           {(pollResults.length ? pollResults : (post.poll_options || []).map((option) => ({ option, votes: 0, percentage: 0 }))).map((option, index) => (
             <TouchableOpacity
               key={`${option.option}-${index}`}
-              style={[styles.pollOption, pollVote === index && styles.pollOptionSelected]}
+              style={[styles.pollOption, { borderColor: colors.border }, pollVote === index && styles.pollOptionSelected]}
               onPress={() => handlePollVote(index)}
               activeOpacity={0.85}
             >
-              <View style={[styles.pollFill, { width: `${option.percentage || 0}%` }]} />
-              <Text style={styles.pollOptionText}>{option.option}</Text>
-              <Text style={styles.pollPercent}>{option.percentage || 0}%</Text>
+              <View style={[styles.pollFill, { backgroundColor: colors.primarySoft || '#FFE3EC', width: `${option.percentage || 0}%` }]} />
+              <Text style={[styles.pollOptionText, { color: colors.textPrimary }]}>{option.option}</Text>
+              <Text style={[styles.pollPercent, { color: colors.textSecondary }]}>{option.percentage || 0}%</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -194,7 +195,7 @@ function PostCard({ post, navigation, onDelete }) {
             <Ionicons
               name={liked ? 'heart' : 'heart-outline'}
               size={26}
-              color={liked ? Colors.error : Colors.textPrimary}
+              color={liked ? Colors.error : colors.textPrimary}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -202,17 +203,17 @@ function PostCard({ post, navigation, onDelete }) {
             onPress={() => navigation.navigate('Comments', { postId: post.id })}
             activeOpacity={0.7}
           >
-            <Ionicons name="chatbubble-outline" size={24} color={Colors.textPrimary} />
+            <Ionicons name="chatbubble-outline" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleRepost} style={styles.actionBtn} activeOpacity={0.7}>
             <Ionicons
               name={reposted ? 'repeat' : 'repeat-outline'}
               size={24}
-              color={reposted ? Colors.primary : Colors.textPrimary}
+              color={reposted ? Colors.primary : colors.textPrimary}
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleShare} style={styles.actionBtn} activeOpacity={0.7}>
-            <Ionicons name="paper-plane-outline" size={24} color={Colors.textPrimary} />
+            <Ionicons name="paper-plane-outline" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
         {post.is_owner ? (
@@ -221,23 +222,23 @@ function PostCard({ post, navigation, onDelete }) {
             onPress={() => navigation.navigate('PostAnalytics', { postId: post.id })}
             activeOpacity={0.7}
           >
-            <Ionicons name="stats-chart-outline" size={24} color={Colors.textPrimary} />
+            <Ionicons name="stats-chart-outline" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
         ) : null}
       </View>
 
       <View style={styles.metricsRow}>
-        {likesCount > 0 ? <Text style={styles.metricText}>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</Text> : null}
-        {repostsCount > 0 ? <Text style={styles.metricText}>{repostsCount} repost{repostsCount === 1 ? '' : 's'}</Text> : null}
-        {sharesCount > 0 ? <Text style={styles.metricText}>{sharesCount} share{sharesCount === 1 ? '' : 's'}</Text> : null}
-        <Text style={styles.metricText}>{viewsCount} view{viewsCount === 1 ? '' : 's'}</Text>
+        {likesCount > 0 ? <Text style={[styles.metricText, { color: colors.textPrimary }]}>{likesCount} {likesCount === 1 ? 'like' : 'likes'}</Text> : null}
+        {repostsCount > 0 ? <Text style={[styles.metricText, { color: colors.textPrimary }]}>{repostsCount} repost{repostsCount === 1 ? '' : 's'}</Text> : null}
+        {sharesCount > 0 ? <Text style={[styles.metricText, { color: colors.textPrimary }]}>{sharesCount} share{sharesCount === 1 ? '' : 's'}</Text> : null}
+        <Text style={[styles.metricText, { color: colors.textPrimary }]}>{viewsCount} view{viewsCount === 1 ? '' : 's'}</Text>
       </View>
 
       {/* Caption */}
       {post.caption && !isTextPost && !isPollPost ? (
         <View style={styles.captionRow}>
-          <Text style={styles.captionUsername}>{post.user?.username}</Text>
-          <Text style={styles.captionText}> {post.caption}</Text>
+          <Text style={[styles.captionUsername, { color: colors.textPrimary }]}>{post.user?.username}</Text>
+          <Text style={[styles.captionText, { color: colors.textPrimary }]}> {post.caption}</Text>
         </View>
       ) : null}
 
@@ -257,7 +258,7 @@ function PostCard({ post, navigation, onDelete }) {
           onPress={() => navigation.navigate('Comments', { postId: post.id })}
           activeOpacity={0.7}
         >
-          <Text style={styles.viewComments}>
+          <Text style={[styles.viewComments, { color: colors.textSecondary }]}>
             View {post.comments_count === 1 ? '1 comment' : `all ${post.comments_count} comments`}
           </Text>
         </TouchableOpacity>
@@ -266,8 +267,8 @@ function PostCard({ post, navigation, onDelete }) {
       {/* Recent Comments Preview */}
       {post.recent_comments?.slice(0, 2).map((comment) => (
         <View key={comment.id} style={styles.commentPreview}>
-          <Text style={styles.commentUsername}>{comment.user?.username}</Text>
-          <Text style={styles.commentBody} numberOfLines={1}> {comment.body}</Text>
+          <Text style={[styles.commentUsername, { color: colors.textPrimary }]}>{comment.user?.username}</Text>
+          <Text style={[styles.commentBody, { color: colors.textPrimary }]} numberOfLines={1}> {comment.body}</Text>
         </View>
       ))}
     </View>

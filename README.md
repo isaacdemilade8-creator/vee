@@ -1,6 +1,6 @@
 # 📷 Vee — Full-Stack Social Media MVP
 
-A production-ready Instagram clone built with:
+A production-ready Social app built with:
 - **Backend**: Laravel 11 + Sanctum API
 - **Frontend**: React Native (Expo)
 - **Database**: MySQL 8

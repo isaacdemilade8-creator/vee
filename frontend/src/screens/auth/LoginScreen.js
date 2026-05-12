@@ -8,10 +8,11 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../context/AuthContext';
-import { Colors, Typography, Spacing, BorderRadius } from '../../utils/theme';
+import { Colors, Typography, Spacing, BorderRadius, useAppTheme } from '../../utils/theme';
 
 export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
+  const { colors } = useAppTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,30 +31,30 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.surface }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.logoContainer}>
           <LinearGradient colors={['#833AB4','#FD1D1D','#FCAF45']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.logoGradient}>
             <Image source={require('../../assets/icon.png')} style={styles.logoImage} />
           </LinearGradient>
-          <Text style={styles.appName}>Vee</Text>
-          <Text style={styles.tagline}>Share your world</Text>
+          <Text style={[styles.appName, { color: colors.textPrimary }]}>Vee</Text>
+          <Text style={[styles.tagline, { color: colors.textSecondary }]}>Share your world</Text>
         </View>
 
         <View style={styles.form}>
           <TextInput
-            style={[styles.input, errors.email && styles.inputError]}
+            style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }, errors.email && styles.inputError]}
             placeholder="Email or username"
-            placeholderTextColor={Colors.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             value={email} onChangeText={setEmail}
             autoCapitalize="none" keyboardType="email-address" returnKeyType="next" autoCorrect={false}
           />
           {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
           <TextInput
-            style={[styles.input, errors.password && styles.inputError]}
+            style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }, errors.password && styles.inputError]}
             placeholder="Password"
-            placeholderTextColor={Colors.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             value={password} onChangeText={setPassword}
             secureTextEntry returnKeyType="done" onSubmitEditing={handleLogin}
           />
@@ -64,14 +65,14 @@ export default function LoginScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.dividerLine} />
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>OR</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
           </View>
         </View>
 
         <View style={styles.registerRow}>
-          <Text style={styles.registerText}>Don't have an account? </Text>
+          <Text style={[styles.registerText, { color: colors.textSecondary }]}>Don't have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text style={styles.registerLink}>Sign up</Text>
           </TouchableOpacity>

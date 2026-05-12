@@ -10,13 +10,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { DiscoveryAPI, InboxAPI, UserAPI } from '../../api/services';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import MediaView from '../../components/common/MediaView';
-import { Colors, Typography, Spacing, BorderRadius } from '../../utils/theme';
+import { Colors, Typography, Spacing, BorderRadius, useAppTheme } from '../../utils/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GRID_SIZE = (SCREEN_WIDTH - (Spacing.md * 2) - 8) / 2;
 const FALLBACK_CATEGORIES = ['trending', 'entertainment', 'education', 'sports', 'technology', 'lifestyle'];
 
 export default function SearchScreen({ route, navigation }) {
+  const { colors } = useAppTheme();
   const [query, setQuery] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [postResults, setPostResults] = useState([]);
@@ -106,7 +107,7 @@ export default function SearchScreen({ route, navigation }) {
   };
 
   const renderUser = ({ item }) => (
-    <View style={styles.userRow}>
+    <View style={[styles.userRow, { borderBottomColor: colors.border }]}>
       <TouchableOpacity
         style={styles.userLink}
         onPress={() => navigation.navigate('UserProfile', { username: item.username })}
@@ -114,8 +115,8 @@ export default function SearchScreen({ route, navigation }) {
       >
         <ProfileAvatar user={item} size={44} />
         <View style={styles.userInfo}>
-          <Text style={styles.username}>{item.username}</Text>
-          {item.full_name ? <Text style={styles.fullName}>{item.full_name}</Text> : null}
+          <Text style={[styles.username, { color: colors.textPrimary }]}>{item.username}</Text>
+          {item.full_name ? <Text style={[styles.fullName, { color: colors.textSecondary }]}>{item.full_name}</Text> : null}
         </View>
       </TouchableOpacity>
       <TouchableOpacity
@@ -139,21 +140,21 @@ export default function SearchScreen({ route, navigation }) {
     const isActive = name === selectedCategory;
     return (
       <TouchableOpacity
-        style={[styles.categoryChip, isActive && styles.categoryChipActive]}
+        style={[styles.categoryChip, { backgroundColor: colors.surface, borderColor: colors.border }, isActive && { backgroundColor: colors.primary, borderColor: colors.primary }]}
         onPress={() => loadCategoryPosts(name)}
         activeOpacity={0.85}
       >
-        <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>
+        <Text style={[styles.categoryText, { color: colors.textPrimary }, isActive && styles.categoryTextActive]}>
           {label}
         </Text>
-        {item.posts_count ? <Text style={styles.categoryCount}>{item.posts_count}</Text> : null}
+        {item.posts_count ? <Text style={[styles.categoryCount, { color: isActive ? Colors.white : colors.textSecondary }]}>{item.posts_count}</Text> : null}
       </TouchableOpacity>
     );
   };
 
   const renderPost = ({ item }) => (
     <TouchableOpacity
-      style={styles.postCard}
+      style={[styles.postCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => navigation.navigate('Comments', { postId: item.id })}
       activeOpacity={0.9}
     >
@@ -165,7 +166,7 @@ export default function SearchScreen({ route, navigation }) {
       />
       <View style={styles.postMeta}>
         <ProfileAvatar user={item.user} size={24} />
-        <Text style={styles.postUsername} numberOfLines={1}>{item.user?.username}</Text>
+        <Text style={[styles.postUsername, { color: colors.textPrimary }]} numberOfLines={1}>{item.user?.username}</Text>
       </View>
       {item.hashtags?.length ? (
         <View style={styles.postTagsRow}>
@@ -184,7 +185,7 @@ export default function SearchScreen({ route, navigation }) {
     return (
       <View style={styles.searchPostWrap}>
         <TouchableOpacity
-          style={styles.searchPost}
+          style={[styles.searchPost, { borderBottomColor: colors.border }]}
           onPress={() => navigation.navigate('Comments', { postId: item.id })}
           activeOpacity={0.88}
         >
@@ -197,9 +198,9 @@ export default function SearchScreen({ route, navigation }) {
           <View style={styles.searchPostBody}>
             <View style={styles.searchPostAuthor}>
               <ProfileAvatar user={item.user} size={30} />
-              <Text style={styles.postUsername} numberOfLines={1}>{item.user?.username}</Text>
+              <Text style={[styles.postUsername, { color: colors.textPrimary }]} numberOfLines={1}>{item.user?.username}</Text>
             </View>
-            {item.caption ? <Text style={styles.captionSnippet} numberOfLines={2}>{item.caption}</Text> : null}
+            {item.caption ? <Text style={[styles.captionSnippet, { color: colors.textPrimary }]} numberOfLines={2}>{item.caption}</Text> : null}
             {item.hashtags?.length ? (
               <View style={styles.inlineTags}>
                 {item.hashtags.slice(0, 4).map((tag) => (
@@ -224,13 +225,13 @@ export default function SearchScreen({ route, navigation }) {
     : categoryPosts;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchBar}>
-        <Ionicons name="search" size={18} color={Colors.textSecondary} style={styles.searchIcon} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.searchBar, { backgroundColor: colors.input || colors.surface, borderColor: colors.border }]}>
+        <Ionicons name="search" size={18} color={colors.textSecondary} style={styles.searchIcon} />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: colors.textPrimary }]}
           placeholder="Search users, captions, hashtags..."
-          placeholderTextColor={Colors.textSecondary}
+          placeholderTextColor={colors.textSecondary}
           value={query}
           onChangeText={handleChange}
           autoCapitalize="none"
@@ -239,7 +240,7 @@ export default function SearchScreen({ route, navigation }) {
         />
         {query.length > 0 && (
           <TouchableOpacity onPress={() => { setQuery(''); setUserResults([]); setPostResults([]); setActiveHashtag(null); setSearched(false); }}>
-            <Ionicons name="close-circle" size={18} color={Colors.textSecondary} />
+            <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -256,7 +257,7 @@ export default function SearchScreen({ route, navigation }) {
             columnWrapperStyle={!showingSearch ? styles.postRow : undefined}
             ListHeaderComponent={!showingSearch ? (
               <View>
-                <Text style={styles.sectionTitle}>Browse by category</Text>
+                <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Browse by category</Text>
                 <FlatList
                   data={categories}
                   keyExtractor={(item) => item.key || item.name || item}
@@ -266,7 +267,7 @@ export default function SearchScreen({ route, navigation }) {
                   contentContainerStyle={styles.categories}
                 />
                 <View style={styles.categoryHeader}>
-                  <Text style={styles.sectionTitle}>{selectedCategory[0].toUpperCase() + selectedCategory.slice(1)} posts</Text>
+                  <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{selectedCategory[0].toUpperCase() + selectedCategory.slice(1)} posts</Text>
                   {categoryLoading ? <ActivityIndicator size="small" color={Colors.primary} /> : null}
                 </View>
               </View>
@@ -274,11 +275,11 @@ export default function SearchScreen({ route, navigation }) {
             ListEmptyComponent={
               (searched || activeHashtag) && query.length >= 2 ? (
                 <View style={styles.empty}>
-                  <Text style={styles.emptyText}>No results found for "{query}"</Text>
+                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No results found for "{query}"</Text>
                 </View>
               ) : !categoryLoading ? (
                 <View style={styles.empty}>
-                  <Text style={styles.emptyText}>No posts in this category yet.</Text>
+                  <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No posts in this category yet.</Text>
                 </View>
               ) : null
             }

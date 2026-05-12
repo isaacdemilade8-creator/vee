@@ -1,9 +1,0 @@
-
-Deprecated: Constant PDO::MYSQL_ATTR_SSL_CA is deprecated since 8.5, use Pdo\Mysql::ATTR_SSL_CA instead in C:\xampp\htdocs\dashboard\instagramtech\backend\vendor\laravel\framework\config\database.php on line 61
-
-Deprecated: Constant PDO::MYSQL_ATTR_SSL_CA is deprecated since 8.5, use Pdo\Mysql::ATTR_SSL_CA instead in C:\xampp\htdocs\dashboard\instagramtech\backend\vendor\laravel\framework\config\database.php on line 81
-
-   INFO  Server running on [http://127.0.0.1:8002].  
-
-  Press Ctrl+C to stop the server
-

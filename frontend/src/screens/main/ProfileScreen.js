@@ -15,7 +15,7 @@ import { StoryAPI, UserAPI } from '../../api/services';
 import { normalizeMediaUrl } from '../../api/client';
 import Avatar from '../../components/common/Avatar';
 import PostCard from '../../components/post/PostCard';
-import { BorderRadius, Colors, Spacing, Typography } from '../../utils/theme';
+import { BorderRadius, Colors, Spacing, Typography, useAppTheme } from '../../utils/theme';
 
 const TABS = [
   { key: 'posts', label: 'Posts' },
@@ -25,6 +25,7 @@ const TABS = [
 
 export default function ProfileScreen({ navigation }) {
   const { user, logout, refreshUser, updateUser } = useAuth();
+  const { colors } = useAppTheme();
   const [posts, setPosts] = useState([]);
   const [reposts, setReposts] = useState([]);
   const [activeTab, setActiveTab] = useState('posts');
@@ -167,8 +168,8 @@ export default function ProfileScreen({ navigation }) {
   }, []);
 
   const Header = () => (
-    <View style={styles.headerWrap}>
-      <TouchableOpacity style={styles.cover} onPress={handleCoverChange} activeOpacity={0.9}>
+    <View style={[styles.headerWrap, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <TouchableOpacity style={[styles.cover, { backgroundColor: colors.surfaceMuted || '#18212F' }]} onPress={handleCoverChange} activeOpacity={0.9}>
         {user?.cover_photo_url ? (
           <Image source={{ uri: normalizeMediaUrl(user.cover_photo_url) }} style={styles.coverImage} />
         ) : null}
@@ -181,7 +182,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.identityRow}>
           <TouchableOpacity onPress={handleAvatarPress} activeOpacity={0.85}>
             <View style={styles.avatarShell}>
-              <View style={[styles.avatarStoryRing, user?.has_active_story && styles.avatarStoryRingActive]}>
+              <View style={[styles.avatarStoryRing, { backgroundColor: colors.surface, borderColor: colors.surface }, user?.has_active_story && styles.avatarStoryRingActive]}>
                 <Avatar uri={user?.avatar_url} username={user?.username} size={88} />
               </View>
               <TouchableOpacity style={styles.avatarEditBadge} onPress={handleAvatarChange} activeOpacity={0.85}>
@@ -190,34 +191,34 @@ export default function ProfileScreen({ navigation }) {
             </View>
           </TouchableOpacity>
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.navigate('Settings')}>
-              <Ionicons name="settings-outline" size={19} color={Colors.textPrimary} />
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => navigation.navigate('Settings')}>
+              <Ionicons name="settings-outline" size={19} color={colors.textPrimary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn} onPress={logout}>
-              <Ionicons name="log-out-outline" size={19} color={Colors.textPrimary} />
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={logout}>
+              <Ionicons name="log-out-outline" size={19} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
         </View>
 
-        <Text style={styles.name}>{user?.full_name || user?.username}</Text>
-        <Text style={styles.handle}>@{user?.username}</Text>
-        {user?.bio ? <Text style={styles.bio}>{user.bio}</Text> : null}
+        <Text style={[styles.name, { color: colors.textPrimary }]}>{user?.full_name || user?.username}</Text>
+        <Text style={[styles.handle, { color: colors.textSecondary }]}>@{user?.username}</Text>
+        {user?.bio ? <Text style={[styles.bio, { color: colors.textPrimary }]}>{user.bio}</Text> : null}
 
         {editMode ? (
           <View style={styles.editFields}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.input || colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
               value={fullName}
               onChangeText={setFullName}
               placeholder="Full name"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor={colors.textSecondary}
             />
             <TextInput
-              style={[styles.input, styles.bioInput]}
+              style={[styles.input, styles.bioInput, { backgroundColor: colors.input || colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
               value={bio}
               onChangeText={setBio}
               placeholder="Bio"
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor={colors.textSecondary}
               multiline
               textAlignVertical="top"
             />
@@ -225,29 +226,29 @@ export default function ProfileScreen({ navigation }) {
         ) : null}
 
         <View style={styles.statsRow}>
-          <Text style={styles.statText}><Text style={styles.statValue}>{posts.length}</Text> Posts</Text>
-          <Text style={styles.statText}><Text style={styles.statValue}>{user?.followers_count ?? 0}</Text> Followers</Text>
-          <Text style={styles.statText}><Text style={styles.statValue}>{user?.following_count ?? 0}</Text> Following</Text>
+          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{posts.length}</Text> Posts</Text>
+          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{user?.followers_count ?? 0}</Text> Followers</Text>
+          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{user?.following_count ?? 0}</Text> Following</Text>
         </View>
 
         {editMode ? (
           <View style={styles.actionButtons}>
-            <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={handleSaveProfile} disabled={saving}>
+            <TouchableOpacity style={[styles.editBtn, { flex: 1, borderColor: colors.border }]} onPress={handleSaveProfile} disabled={saving}>
               {saving ? <ActivityIndicator size="small" color={Colors.primary} />
                 : <Text style={[styles.editBtnText, { color: Colors.primary }]}>Save</Text>}
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={() => setEditMode(false)}>
-              <Text style={styles.editBtnText}>Cancel</Text>
+            <TouchableOpacity style={[styles.editBtn, { flex: 1, borderColor: colors.border }]} onPress={() => setEditMode(false)}>
+              <Text style={[styles.editBtnText, { color: colors.textPrimary }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity style={styles.editProfileBtn} onPress={() => setEditMode(true)}>
-            <Text style={styles.editBtnText}>Edit Profile</Text>
+          <TouchableOpacity style={[styles.editProfileBtn, { borderColor: colors.border }]} onPress={() => setEditMode(true)}>
+            <Text style={[styles.editBtnText, { color: colors.textPrimary }]}>Edit Profile</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      <View style={styles.tabs}>
+      <View style={[styles.tabs, { borderTopColor: colors.border }]}>
         {TABS.map((tab) => (
           <TouchableOpacity
             key={tab.key}
@@ -255,7 +256,7 @@ export default function ProfileScreen({ navigation }) {
             onPress={() => setActiveTab(tab.key)}
             activeOpacity={0.85}
           >
-            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
+            <Text style={[styles.tabText, { color: colors.textSecondary }, activeTab === tab.key && [styles.tabTextActive, { color: colors.textPrimary }]]}>{tab.label}</Text>
             {activeTab === tab.key ? <View style={styles.tabIndicator} /> : null}
           </TouchableOpacity>
         ))}
@@ -264,7 +265,7 @@ export default function ProfileScreen({ navigation }) {
   );
 
   if (loading && posts.length === 0) {
-    return <ActivityIndicator size="large" color={Colors.primary} style={styles.loader} />;
+    return <ActivityIndicator size="large" color={colors.primary} style={[styles.loader, { backgroundColor: colors.background }]} />;
   }
 
   return (
@@ -274,27 +275,27 @@ export default function ProfileScreen({ navigation }) {
       renderItem={({ item }) => (
         <View>
           {activeTab === 'reposts' ? (
-            <View style={styles.repostLabel}>
-              <Ionicons name="repeat" size={14} color={Colors.textSecondary} />
-              <Text style={styles.repostText}>You reposted</Text>
+            <View style={[styles.repostLabel, { backgroundColor: colors.surface }]}>
+              <Ionicons name="repeat" size={14} color={colors.textSecondary} />
+              <Text style={[styles.repostText, { color: colors.textSecondary }]}>You reposted</Text>
             </View>
           ) : null}
           <PostCard post={item} navigation={navigation} onDelete={handleDelete} />
         </View>
       )}
       ListHeaderComponent={<Header />}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} />}
       ListEmptyComponent={
         !loading && (
           <View style={styles.empty}>
-            <Ionicons name={activeTab === 'media' ? 'images-outline' : activeTab === 'reposts' ? 'repeat-outline' : 'chatbubble-ellipses-outline'} size={42} color={Colors.textTertiary} />
-            <Text style={styles.emptyText}>
+            <Ionicons name={activeTab === 'media' ? 'images-outline' : activeTab === 'reposts' ? 'repeat-outline' : 'chatbubble-ellipses-outline'} size={42} color={colors.textTertiary} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
               {activeTab === 'media' ? 'No photo or video posts yet' : activeTab === 'reposts' ? 'No reposts yet' : 'No posts yet'}
             </Text>
           </View>
         )
       }
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     />
   );
 }

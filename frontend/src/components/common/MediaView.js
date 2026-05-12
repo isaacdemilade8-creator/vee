@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { normalizeMediaUrl } from '../../api/client';
-import { BorderRadius, Colors, Spacing, Typography } from '../../utils/theme';
+import { BorderRadius, Colors, Spacing, Typography, useAppTheme } from '../../utils/theme';
 
 function VideoMedia({ uri, style, nativeControls = true }) {
   const player = useVideoPlayer(uri, (videoPlayer) => {
@@ -30,6 +30,7 @@ function formatSeconds(seconds = 0) {
 }
 
 function AudioMedia({ uri, style }) {
+  const { colors } = useAppTheme();
   const player = useAudioPlayer(uri, { updateInterval: 500 });
   const status = useAudioPlayerStatus(player);
   const progress = status.duration ? Math.min(100, (status.currentTime / status.duration) * 100) : 0;
@@ -40,16 +41,16 @@ function AudioMedia({ uri, style }) {
   };
 
   return (
-    <View style={[styles.audioCard, style]}>
-      <TouchableOpacity style={styles.audioButton} onPress={togglePlayback} activeOpacity={0.85}>
+    <View style={[styles.audioCard, { backgroundColor: colors.background }, style]}>
+      <TouchableOpacity style={[styles.audioButton, { backgroundColor: colors.primary }]} onPress={togglePlayback} activeOpacity={0.85}>
         <Ionicons name={status.playing ? 'pause' : 'play'} size={24} color={Colors.white} />
       </TouchableOpacity>
       <View style={styles.audioInfo}>
-        <Text style={styles.audioTitle}>Audio</Text>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+        <Text style={[styles.audioTitle, { color: colors.textPrimary }]}>Audio</Text>
+        <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
+          <View style={[styles.progressFill, { backgroundColor: colors.primary, width: `${progress}%` }]} />
         </View>
-        <Text style={styles.audioTime}>
+        <Text style={[styles.audioTime, { color: colors.textSecondary }]}>
           {formatSeconds(status.currentTime)} / {formatSeconds(status.duration)}
         </Text>
       </View>
@@ -58,20 +59,21 @@ function AudioMedia({ uri, style }) {
 }
 
 export default function MediaView({ uri, type = 'image', style, nativeControls }) {
+  const { colors } = useAppTheme();
   const mediaUri = normalizeMediaUrl(uri);
 
   if (type === 'text' || type === 'poll') {
     return (
-      <View style={[styles.empty, style]}>
-        <Ionicons name={type === 'poll' ? 'bar-chart-outline' : 'text-outline'} size={32} color={Colors.textTertiary} />
+      <View style={[styles.empty, { backgroundColor: colors.background }, style]}>
+        <Ionicons name={type === 'poll' ? 'bar-chart-outline' : 'text-outline'} size={32} color={colors.textTertiary} />
       </View>
     );
   }
 
   if (!mediaUri) {
     return (
-      <View style={[styles.empty, style]}>
-        <Ionicons name="image-outline" size={32} color={Colors.textTertiary} />
+      <View style={[styles.empty, { backgroundColor: colors.background }, style]}>
+        <Ionicons name="image-outline" size={32} color={colors.textTertiary} />
       </View>
     );
   }

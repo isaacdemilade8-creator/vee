@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePreferences } from '../../context/PreferencesContext';
-import { Colors, BorderRadius, Spacing, Typography } from '../../utils/theme';
+import { Colors, BorderRadius, Spacing, Typography, useAppTheme } from '../../utils/theme';
 
 const FONT_OPTIONS = [
   { label: 'Small', value: 0.92 },
@@ -12,58 +12,59 @@ const FONT_OPTIONS = [
 
 export default function SettingsScreen() {
   const { preferences, updatePreference } = usePreferences();
+  const { colors } = useAppTheme();
 
   const ToggleRow = ({ icon, label, description, value, onValueChange }) => (
     <View style={styles.row}>
-      <View style={styles.iconWrap}><Ionicons name={icon} size={20} color={Colors.primary} /></View>
+      <View style={[styles.iconWrap, { backgroundColor: colors.background }]}><Ionicons name={icon} size={20} color={colors.primary} /></View>
       <View style={styles.rowText}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.description}>{description}</Text>
+        <Text style={[styles.label, { color: colors.textPrimary }]}>{label}</Text>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
       </View>
-      <Switch value={value} onValueChange={onValueChange} trackColor={{ true: Colors.primary }} />
+      <Switch value={value} onValueChange={onValueChange} trackColor={{ true: colors.primary }} />
     </View>
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionTitle}>Display</Text>
-      <View style={styles.card}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Display</Text>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.row}>
-          <View style={styles.iconWrap}><Ionicons name="contrast-outline" size={20} color={Colors.primary} /></View>
+          <View style={[styles.iconWrap, { backgroundColor: colors.background }]}><Ionicons name="contrast-outline" size={20} color={colors.primary} /></View>
           <View style={styles.rowText}>
-            <Text style={styles.label}>Theme</Text>
-            <Text style={styles.description}>Choose how Vee looks on this device.</Text>
+            <Text style={[styles.label, { color: colors.textPrimary }]}>Theme</Text>
+            <Text style={[styles.description, { color: colors.textSecondary }]}>Choose how Vee looks on this device.</Text>
           </View>
         </View>
-        <View style={styles.segmented}>
+        <View style={[styles.segmented, { backgroundColor: colors.background }]}>
           {['light', 'dark', 'system'].map((theme) => (
             <TouchableOpacity
               key={theme}
-              style={[styles.segment, preferences.theme === theme && styles.segmentActive]}
+              style={[styles.segment, preferences.theme === theme && [styles.segmentActive, { backgroundColor: colors.surface, borderColor: colors.border }]]}
               onPress={() => updatePreference('theme', theme)}
             >
-              <Text style={[styles.segmentText, preferences.theme === theme && styles.segmentTextActive]}>
+              <Text style={[styles.segmentText, { color: colors.textSecondary }, preferences.theme === theme && [styles.segmentTextActive, { color: colors.textPrimary }]]}>
                 {theme[0].toUpperCase() + theme.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
-        <Text style={styles.subLabel}>Font size</Text>
-        <View style={styles.segmented}>
+        <Text style={[styles.subLabel, { color: colors.textSecondary }]}>Font size</Text>
+        <View style={[styles.segmented, { backgroundColor: colors.background }]}>
           {FONT_OPTIONS.map((option) => (
             <TouchableOpacity
               key={option.label}
-              style={[styles.segment, preferences.fontScale === option.value && styles.segmentActive]}
+              style={[styles.segment, preferences.fontScale === option.value && [styles.segmentActive, { backgroundColor: colors.surface, borderColor: colors.border }]]}
               onPress={() => updatePreference('fontScale', option.value)}
             >
-              <Text style={[styles.segmentText, preferences.fontScale === option.value && styles.segmentTextActive]}>{option.label}</Text>
+              <Text style={[styles.segmentText, { color: colors.textSecondary }, preferences.fontScale === option.value && [styles.segmentTextActive, { color: colors.textPrimary }]]}>{option.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Experience</Text>
-      <View style={styles.card}>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Experience</Text>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ToggleRow
           icon="play-circle-outline"
           label="Autoplay videos"
@@ -87,8 +88,8 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <Text style={styles.sectionTitle}>Privacy</Text>
-      <View style={styles.card}>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Privacy</Text>
+      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <ToggleRow
           icon="lock-closed-outline"
           label="Private account"

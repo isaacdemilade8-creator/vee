@@ -4,10 +4,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import { InboxAPI } from '../../api/services';
-import { Colors, Spacing, Typography } from '../../utils/theme';
+import { Colors, Spacing, Typography, useAppTheme } from '../../utils/theme';
 import { formatDistanceToNow } from '../../utils/dateUtils';
 
 export default function InboxScreen({ navigation }) {
+  const { colors } = useAppTheme();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -38,17 +39,17 @@ export default function InboxScreen({ navigation }) {
     const latest = item.latest_message;
     return (
       <TouchableOpacity
-        style={styles.row}
+        style={[styles.row, { borderBottomColor: colors.border }]}
         onPress={() => navigation.navigate('Chat', { conversationId: item.id, user: otherUser })}
         activeOpacity={0.82}
       >
         <ProfileAvatar user={otherUser} size={54} openStory={false} />
         <View style={styles.rowText}>
           <View style={styles.rowTop}>
-            <Text style={styles.username}>{otherUser?.username}</Text>
-            {latest?.created_at ? <Text style={styles.time}>{formatDistanceToNow(latest.created_at)}</Text> : null}
+            <Text style={[styles.username, { color: colors.textPrimary }]}>{otherUser?.username}</Text>
+            {latest?.created_at ? <Text style={[styles.time, { color: colors.textSecondary }]}>{formatDistanceToNow(latest.created_at)}</Text> : null}
           </View>
-          <Text style={[styles.preview, item.unread_count > 0 && styles.unreadPreview]} numberOfLines={1}>
+          <Text style={[styles.preview, { color: colors.textSecondary }, item.unread_count > 0 && { color: colors.textPrimary, fontWeight: '700' }]} numberOfLines={1}>
             {latest?.body || 'Start the conversation'}
           </Text>
         </View>
@@ -57,22 +58,22 @@ export default function InboxScreen({ navigation }) {
     );
   };
 
-  if (loading) return <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />;
+  if (loading) return <ActivityIndicator size="large" color={colors.primary} style={{ flex: 1, backgroundColor: colors.background }} />;
 
   return (
     <FlatList
       data={conversations}
       keyExtractor={(item) => String(item.id)}
       renderItem={renderConversation}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={Colors.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
       ListEmptyComponent={
         <View style={styles.empty}>
-          <Ionicons name="paper-plane-outline" size={46} color={Colors.textTertiary} />
-          <Text style={styles.emptyTitle}>No messages yet</Text>
-          <Text style={styles.emptyText}>Open a profile and tap Message to start a DM.</Text>
+          <Ionicons name="paper-plane-outline" size={46} color={colors.textTertiary} />
+          <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No messages yet</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Open a profile and tap Message to start a DM.</Text>
         </View>
       }
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     />
   );
 }

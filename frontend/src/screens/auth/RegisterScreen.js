@@ -7,10 +7,11 @@ import {
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { Colors, Typography, Spacing, BorderRadius } from '../../utils/theme';
+import { Colors, Typography, Spacing, BorderRadius, useAppTheme } from '../../utils/theme';
 
 export default function RegisterScreen({ navigation }) {
   const { register } = useAuth();
+  const { colors } = useAppTheme();
   const [form, setForm] = useState({ username: '', email: '', full_name: '', password: '', password_confirmation: '' });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -31,50 +32,50 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
-  const Field = ({ field, placeholder, keyboardType, secureTextEntry, autoCapitalize }) => (
+  const renderField = ({ field, placeholder, keyboardType, secureTextEntry, autoCapitalize, returnKeyType = 'next' }) => (
     <View style={styles.fieldWrapper}>
       <TextInput
-        style={[styles.input, errors[field] && styles.inputError]}
+        style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.textPrimary }, errors[field] && styles.inputError]}
         placeholder={placeholder}
-        placeholderTextColor={Colors.textSecondary}
+        placeholderTextColor={colors.textSecondary}
         value={form[field]}
         onChangeText={update(field)}
         keyboardType={keyboardType || 'default'}
         secureTextEntry={!!secureTextEntry}
         autoCapitalize={autoCapitalize || 'sentences'}
         autoCorrect={false}
-        returnKeyType="next"
+        returnKeyType={returnKeyType}
       />
       {errors[field] ? <Text style={styles.errorText}>{errors[field][0]}</Text> : null}
     </View>
   );
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.surface }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.title}>Create account</Text>
-          <Text style={styles.subtitle}>Join Vee today</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Create account</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Join Vee today</Text>
         </View>
 
         <View style={styles.form}>
-          <Field field="full_name" placeholder="Full name" />
-          <Field field="username" placeholder="Username" autoCapitalize="none" />
-          <Field field="email" placeholder="Email address" keyboardType="email-address" autoCapitalize="none" />
-          <Field field="password" placeholder="Password (min 8 characters)" secureTextEntry />
-          <Field field="password_confirmation" placeholder="Confirm password" secureTextEntry />
+          {renderField({ field: 'full_name', placeholder: 'Full name' })}
+          {renderField({ field: 'username', placeholder: 'Username', autoCapitalize: 'none' })}
+          {renderField({ field: 'email', placeholder: 'Email address', keyboardType: 'email-address', autoCapitalize: 'none' })}
+          {renderField({ field: 'password', placeholder: 'Password (min 8 characters)', secureTextEntry: true })}
+          {renderField({ field: 'password_confirmation', placeholder: 'Confirm password', secureTextEntry: true, returnKeyType: 'done' })}
 
           <TouchableOpacity style={[styles.button, loading && styles.disabled]} onPress={handleRegister} disabled={loading} activeOpacity={0.85}>
             {loading ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.buttonText}>Sign Up</Text>}
           </TouchableOpacity>
 
-          <Text style={styles.terms}>
+          <Text style={[styles.terms, { color: colors.textSecondary }]}>
             By signing up you agree to our Terms of Service and Privacy Policy.
           </Text>
         </View>
 
         <View style={styles.loginRow}>
-          <Text style={styles.loginText}>Already have an account? </Text>
+          <Text style={[styles.loginText, { color: colors.textSecondary }]}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text style={styles.loginLink}>Log in</Text>
           </TouchableOpacity>

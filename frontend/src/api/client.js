@@ -10,6 +10,7 @@
 
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -17,8 +18,11 @@ import { Platform } from 'react-native';
 // Use your machine's LAN IP when testing on a physical device (not localhost)
 // ─────────────────────────────────────────────────────────────────────────────
 const DEFAULT_PUBLIC_API_URL = 'https://vee-production-76c2.up.railway.app/api';
+const EXPO_API_URL =
+  Constants.expoConfig?.extra?.apiUrl ||
+  Constants.manifest?.extra?.apiUrl;
 
-export const BASE_URL = (process.env.EXPO_PUBLIC_API_URL || DEFAULT_PUBLIC_API_URL).replace(/\/$/, '');
+export const BASE_URL = (EXPO_API_URL || process.env.EXPO_PUBLIC_API_URL || DEFAULT_PUBLIC_API_URL).replace(/\/$/, '');
 
 const API_ORIGIN = BASE_URL.replace(/\/api\/?$/, '');
 

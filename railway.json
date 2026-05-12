@@ -3,7 +3,7 @@
   "build": {
     "builder": "DOCKERFILE",
     "buildCommand": null,
-    "dockerfilePath": "/backend/Dockerfile"
+    "dockerfilePath": "Dockerfile"
   },
   "deploy": {
     "startCommand": null,

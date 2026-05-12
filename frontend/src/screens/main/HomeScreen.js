@@ -14,10 +14,12 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { usePaginatedApi } from '../../hooks/useApi';
 import { PostAPI, StoryAPI } from '../../api/services';
 import { useAuth } from '../../context/AuthContext';
-import { Colors, Typography } from '../../utils/theme';
+import { Colors, Typography, useAppTheme } from '../../utils/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
+  const { colors } = useAppTheme();
   const { items: posts, loading, refreshing, hasMore, loadMore, refresh, setItems } =
     usePaginatedApi(PostAPI.getFeed);
   const [storyGroups, setStoryGroups] = useState([]);
@@ -49,14 +51,14 @@ export default function HomeScreen({ navigation }) {
 
   const renderFooter = () => {
     if (!loading) return null;
-    return <ActivityIndicator size="small" color={Colors.primary} style={{ padding: 20 }} />;
+    return <ActivityIndicator size="small" color={colors.primary} style={{ padding: 20 }} />;
   };
 
   const renderEmpty = () => (
     <View style={styles.empty}>
-      <Text style={styles.emptyIcon}>📸</Text>
-      <Text style={styles.emptyTitle}>No posts yet</Text>
-      <Text style={styles.emptySubtitle}>Follow people or create your first post</Text>
+      <Text style={styles.emptyIcon}><Ionicons name='camera' /></Text>
+      <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>No posts yet</Text>
+      <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>Follow people or create your first post</Text>
     </View>
   );
 
@@ -72,13 +74,13 @@ export default function HomeScreen({ navigation }) {
   if (loading && posts.length === 0) return <LoadingSpinner />;
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['bottom']}>
       <FlatList
         data={posts}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderPost}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refreshAll} tintColor={Colors.primary} />
+          <RefreshControl refreshing={refreshing} onRefresh={refreshAll} tintColor={colors.primary} />
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}

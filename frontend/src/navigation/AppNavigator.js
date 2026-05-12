@@ -9,8 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { usePreferences } from '../context/PreferencesContext';
-import { Colors } from '../utils/theme';
+import { Colors, useAppTheme } from '../utils/theme';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import HomeScreen from '../screens/main/HomeScreen';
@@ -25,6 +24,7 @@ import ChatScreen from '../screens/main/ChatScreen';
 import StoryViewerScreen from '../screens/main/StoryViewerScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import PostAnalyticsScreen from '../screens/main/PostAnalyticsScreen';
+import { Image } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -39,36 +39,37 @@ function AuthStack() {
 }
 
 function HomeStack() {
+  const { colors } = useAppTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.surface }, headerTintColor: colors.textPrimary, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="Feed" component={HomeScreen}
         options={({ navigation }) => ({
           headerTitle: () => (
             <View style={styles.brandTitle}>
               <View style={styles.brandMark}>
-                <Text style={styles.brandMarkText}>V</Text>
+                <Text><Image source={require("../assets/vtwo.png")} style={{ height: 100, width: 100, borderRadius: 50 }} /></Text>
               </View>
               <View>
-                <Text style={styles.brandName}>Vee</Text>
-                <Text style={styles.brandSub}>Today on your feed</Text>
+                <Text style={[styles.brandName, { color: colors.textPrimary }]}>Vee</Text>
+                <Text style={[styles.brandSub, { color: colors.textSecondary }]}>Today on your feed</Text>
               </View>
             </View>
           ),
           headerRight: () => (
             <View style={styles.headerActions}>
               <TouchableOpacity
-                style={styles.headerIcon}
+                style={[styles.headerIcon, { backgroundColor: colors.background, borderColor: colors.border }]}
                 onPress={() => navigation.getParent()?.navigate('SearchTab', { screen: 'Search' })}
                 activeOpacity={0.85}
               >
-                <Ionicons name="search-outline" size={20} color={Colors.textPrimary} />
+                <Ionicons name="search-outline" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.headerIcon}
+                style={[styles.headerIcon, { backgroundColor: colors.background, borderColor: colors.border }]}
                 onPress={() => navigation.getParent()?.navigate('InboxTab', { screen: 'Notifications' })}
                 activeOpacity={0.85}
               >
-                <Ionicons name="notifications-outline" size={20} color={Colors.textPrimary} />
+                <Ionicons name="notifications-outline" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
             </View>
           ),
@@ -83,8 +84,9 @@ function HomeStack() {
 }
 
 function ProfileStack() {
+  const { colors } = useAppTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.surface }, headerTintColor: colors.textPrimary, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="MyProfile" component={ProfileScreen} options={{ title: 'Profile' }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
       <Stack.Screen name="Comments" component={CommentsScreen} options={{ title: 'Comments' }} />
@@ -96,8 +98,9 @@ function ProfileStack() {
 }
 
 function InboxStack() {
+  const { colors } = useAppTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.surface }, headerTintColor: colors.textPrimary, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="Inbox" component={InboxScreen} options={{ title: 'Messages' }} />
       <Stack.Screen name="Chat" component={ChatScreen} options={{ title: '' }} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Activity' }} />
@@ -109,8 +112,9 @@ function InboxStack() {
 }
 
 function SearchStack() {
+  const { colors } = useAppTheme();
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.surface }, headerTintColor: colors.textPrimary, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="Search" component={SearchScreen} options={{ title: 'Explore' }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
       <Stack.Screen name="Comments" component={CommentsScreen} options={{ title: 'Comments' }} />
@@ -121,20 +125,19 @@ function SearchStack() {
 }
 
 function MainTabs() {
-  const { preferences } = usePreferences();
-  const isDark = preferences.theme === 'dark';
+  const { colors, isDark } = useAppTheme();
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarActiveTintColor: isDark ? Colors.white : Colors.black,
-        tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarActiveTintColor: isDark ? colors.textPrimary : Colors.black,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          borderTopColor: isDark ? '#2A2A2D' : Colors.border,
+          borderTopColor: colors.border,
           borderTopWidth: 0.5,
-          backgroundColor: isDark ? '#151518' : Colors.white,
+          backgroundColor: colors.surface,
           height: 56,
           paddingBottom: 6,
         },
@@ -150,7 +153,7 @@ function MainTabs() {
             <Ionicons
               name={icons[route.name]}
               size={route.name === 'CreateTab' ? 32 : 26}
-              color={route.name === 'CreateTab' ? Colors.primary : color}
+              color={route.name === 'CreateTab' ? colors.primary : color}
             />
           );
         },
@@ -168,23 +171,22 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { isAuthenticated, loading } = useAuth();
-  const { preferences } = usePreferences();
-  const isDark = preferences.theme === 'dark';
+  const { colors, isDark } = useAppTheme();
   const navTheme = isDark ? {
     ...DarkTheme,
     colors: {
       ...DarkTheme.colors,
-      primary: Colors.primary,
-      background: '#0F0F10',
-      card: '#151518',
-      border: '#2A2A2D',
-      text: '#F5F5F6',
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.surface,
+      border: colors.border,
+      text: colors.textPrimary,
     },
   } : DefaultTheme;
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.white }}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surface }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -198,7 +200,6 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
   brandTitle: { flexDirection: 'row', alignItems: 'center' },
   brandMark: { width: 34, height: 34, borderRadius: 17, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
-  brandMarkText: { color: Colors.white, fontWeight: '900', fontSize: 16 },
   brandName: { color: Colors.textPrimary, fontWeight: '900', fontSize: 18 },
   brandSub: { color: Colors.textSecondary, fontWeight: '700', fontSize: 11, marginTop: 1 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },

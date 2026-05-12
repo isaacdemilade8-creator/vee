@@ -21,4 +21,8 @@ fi
 rm -rf public/storage
 ln -snf "$APP_PUBLIC_STORAGE" public/storage
 
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+  php artisan migrate --force
+fi
+
 exec php -S 0.0.0.0:${PORT:-8080} -t public public/index.php

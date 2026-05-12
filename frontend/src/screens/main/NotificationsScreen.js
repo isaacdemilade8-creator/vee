@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePaginatedApi } from '../../hooks/useApi';
 import { NotificationAPI } from '../../api/services';
 import { formatDistanceToNow } from '../../utils/dateUtils';
-import { Colors, Typography, Spacing } from '../../utils/theme';
+import { Colors, Typography, Spacing, useAppTheme } from '../../utils/theme';
 
 const ICON_MAP = {
   like:    { name: 'heart', color: Colors.error },
@@ -20,6 +20,7 @@ const ICON_MAP = {
 };
 
 export default function NotificationsScreen() {
+  const { colors } = useAppTheme();
   const { items, loading, refreshing, loadMore, refresh } = usePaginatedApi(NotificationAPI.getAll);
 
   useFocusEffect(useCallback(() => {
@@ -29,34 +30,34 @@ export default function NotificationsScreen() {
   const renderItem = ({ item }) => {
     const icon = ICON_MAP[item.data?.type] || { name: 'notifications', color: Colors.primary };
     return (
-      <View style={[styles.row, !item.read && styles.unread]}>
-        <View style={styles.iconWrapper}>
+      <View style={[styles.row, { borderBottomColor: colors.border }, !item.read && { backgroundColor: colors.primarySoft || colors.background }]}>
+        <View style={[styles.iconWrapper, { backgroundColor: colors.surfaceElevated || colors.background }]}>
           <Ionicons name={icon.name} size={22} color={icon.color} />
         </View>
         <View style={styles.content}>
-          <Text style={styles.message}>{item.data?.message}</Text>
-          <Text style={styles.time}>{formatDistanceToNow(item.created_at)}</Text>
+          <Text style={[styles.message, { color: colors.textPrimary }]}>{item.data?.message}</Text>
+          <Text style={[styles.time, { color: colors.textSecondary }]}>{formatDistanceToNow(item.created_at)}</Text>
         </View>
         {!item.read && <View style={styles.unreadDot} />}
       </View>
     );
   };
 
-  if (loading && items.length === 0) return <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />;
+  if (loading && items.length === 0) return <ActivityIndicator size="large" color={colors.primary} style={{ flex: 1, backgroundColor: colors.background }} />;
 
   return (
     <FlatList
       data={items}
       keyExtractor={(item) => String(item.id)}
       renderItem={renderItem}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={Colors.primary} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       ListEmptyComponent={
         <View style={styles.empty}>
-          <Ionicons name="heart-outline" size={48} color={Colors.textTertiary} />
-          <Text style={styles.emptyText}>No activity yet</Text>
+          <Ionicons name="heart-outline" size={48} color={colors.textTertiary} />
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No activity yet</Text>
         </View>
       }
     />

@@ -7,13 +7,14 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useHeaderHeight } from '@react-navigation/elements';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as DocumentPicker from 'expo-document-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { PostAPI, StoryAPI } from '../../api/services';
 import MediaView from '../../components/common/MediaView';
-import { Colors, Typography, Spacing, BorderRadius } from '../../utils/theme';
+import { Colors, Typography, Spacing, BorderRadius, useAppTheme } from '../../utils/theme';
 
 const ASPECTS = {
   square: { label: '1:1', value: [1, 1] },
@@ -37,6 +38,8 @@ const POST_TYPES = [
 ];
 
 export default function CreatePostScreen({ navigation, route }) {
+  const headerHeight = useHeaderHeight();
+  const { colors } = useAppTheme();
   const initialMode = route?.params?.mode === 'story' ? 'story' : 'post';
   const [shareMode, setShareMode] = useState(initialMode);
   const [media, setMedia] = useState(null);
@@ -237,13 +240,22 @@ export default function CreatePostScreen({ navigation, route }) {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.surface }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        contentContainerStyle={styles.scrollContent}
+      >
         {postType === 'text' || postType === 'poll' ? (
-          <View style={styles.textPreview}>
+          <View style={[styles.textPreview, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <Ionicons name={postType === 'poll' ? 'bar-chart-outline' : 'text-outline'} size={42} color={Colors.primary} />
-            <Text style={styles.textPreviewTitle}>{postType === 'poll' ? 'Poll post' : 'Text post'}</Text>
-            <Text style={styles.textPreviewBody} numberOfLines={4}>{caption || (postType === 'poll' ? 'Ask a question...' : 'Write something...')}</Text>
+            <Text style={[styles.textPreviewTitle, { color: colors.textPrimary }]}>{postType === 'poll' ? 'Poll post' : 'Text post'}</Text>
+            <Text style={[styles.textPreviewBody, { color: colors.textSecondary }]} numberOfLines={4}>{caption || (postType === 'poll' ? 'Ask a question...' : 'Write something...')}</Text>
           </View>
         ) : media ? (
           <View>
@@ -260,88 +272,88 @@ export default function CreatePostScreen({ navigation, route }) {
             </View>
           </View>
         ) : (
-          <View style={styles.pickerArea}>
-            <Ionicons name={postType === 'audio' ? 'musical-notes-outline' : 'images-outline'} size={64} color={Colors.textTertiary} />
-            <Text style={styles.pickerText}>{postType === 'audio' ? 'Add audio' : 'Add a photo or video'}</Text>
+          <View style={[styles.pickerArea, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Ionicons name={postType === 'audio' ? 'musical-notes-outline' : 'images-outline'} size={64} color={colors.textTertiary} />
+            <Text style={[styles.pickerText, { color: colors.textSecondary }]}>{postType === 'audio' ? 'Add audio' : 'Add a photo or video'}</Text>
             <View style={styles.pickerButtons}>
-              <TouchableOpacity style={styles.pickerBtn} onPress={postType === 'audio' ? pickAudio : pickMedia} activeOpacity={0.8}>
+              <TouchableOpacity style={[styles.pickerBtn, { backgroundColor: colors.primary }]} onPress={postType === 'audio' ? pickAudio : pickMedia} activeOpacity={0.8}>
                 <Ionicons name="folder-open-outline" size={20} color={Colors.white} />
                 <Text style={styles.pickerBtnText}>Library</Text>
               </TouchableOpacity>
-              {postType !== 'audio' ? <TouchableOpacity style={[styles.pickerBtn, styles.pickerBtnOutline]} onPress={takePhoto} activeOpacity={0.8}>
-                <Ionicons name="camera-outline" size={20} color={Colors.primary} />
-                <Text style={[styles.pickerBtnText, { color: Colors.primary }]}>Camera</Text>
+              {postType !== 'audio' ? <TouchableOpacity style={[styles.pickerBtn, styles.pickerBtnOutline, { backgroundColor: colors.surface, borderColor: colors.primary }]} onPress={takePhoto} activeOpacity={0.8}>
+                <Ionicons name="camera-outline" size={20} color={colors.primary} />
+                <Text style={[styles.pickerBtnText, { color: colors.primary }]}>Camera</Text>
               </TouchableOpacity> : null}
             </View>
           </View>
         )}
 
-        <View style={styles.tools}>
-          <Text style={styles.toolTitle}>Share to</Text>
-          <View style={styles.segmented}>
+        <View style={[styles.tools, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.toolTitle, { color: colors.textPrimary }]}>Share to</Text>
+          <View style={[styles.segmented, { backgroundColor: colors.background }]}>
             {[
               { key: 'post', label: 'Feed' },
               { key: 'story', label: 'Story' },
             ].map((option) => (
               <TouchableOpacity
                 key={option.key}
-                style={[styles.segment, shareMode === option.key && styles.segmentActive]}
+                style={[styles.segment, shareMode === option.key && [styles.segmentActive, { backgroundColor: colors.surface, borderColor: colors.border }]]}
                 onPress={() => setShareMode(option.key)}
               >
-                <Text style={[styles.segmentText, shareMode === option.key && styles.segmentTextActive]}>{option.label}</Text>
+                <Text style={[styles.segmentText, { color: colors.textSecondary }, shareMode === option.key && [styles.segmentTextActive, { color: colors.textPrimary }]]}>{option.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {shareMode === 'post' ? (
             <>
-              <Text style={styles.toolTitle}>Post type</Text>
+              <Text style={[styles.toolTitle, { color: colors.textPrimary }]}>Post type</Text>
               <View style={styles.typeGrid}>
                 {POST_TYPES.map((option) => (
                   <TouchableOpacity
                     key={option.key}
-                    style={[styles.typeButton, postType === option.key && styles.typeButtonActive]}
+                    style={[styles.typeButton, { backgroundColor: colors.surface, borderColor: colors.border }, postType === option.key && [styles.typeButtonActive, { backgroundColor: colors.primarySoft || colors.background, borderColor: colors.primary }]]}
                     onPress={() => {
                       setPostType(option.key);
                       if (option.key === 'text' || option.key === 'poll') setMedia(null);
                     }}
                     activeOpacity={0.85}
                   >
-                    <Ionicons name={option.icon} size={18} color={postType === option.key ? Colors.primary : Colors.textPrimary} />
-                    <Text style={[styles.typeButtonText, postType === option.key && styles.typeButtonTextActive]}>{option.label}</Text>
+                    <Ionicons name={option.icon} size={18} color={postType === option.key ? colors.primary : colors.textPrimary} />
+                    <Text style={[styles.typeButtonText, { color: colors.textPrimary }, postType === option.key && [styles.typeButtonTextActive, { color: colors.primary }]]}>{option.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </>
           ) : null}
 
-          {postType === 'media' ? <Text style={styles.toolTitle}>Editing</Text> : null}
+          {postType === 'media' ? <Text style={[styles.toolTitle, { color: colors.textPrimary }]}>Editing</Text> : null}
 
-          {postType === 'media' ? <Text style={styles.toolLabel}>Crop</Text> : null}
+          {postType === 'media' ? <Text style={[styles.toolLabel, { color: colors.textSecondary }]}>Crop</Text> : null}
           {postType === 'media' ? (
-          <View style={styles.segmented}>
+          <View style={[styles.segmented, { backgroundColor: colors.background }]}>
             {Object.entries(ASPECTS).map(([key, option]) => (
               <TouchableOpacity
                 key={key}
-                style={[styles.segment, aspectKey === key && styles.segmentActive]}
+                style={[styles.segment, aspectKey === key && [styles.segmentActive, { backgroundColor: colors.surface, borderColor: colors.border }]]}
                 onPress={() => setAspectKey(key)}
               >
-                <Text style={[styles.segmentText, aspectKey === key && styles.segmentTextActive]}>{option.label}</Text>
+                <Text style={[styles.segmentText, { color: colors.textSecondary }, aspectKey === key && [styles.segmentTextActive, { color: colors.textPrimary }]]}>{option.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
           ) : null}
 
-          {postType === 'media' ? <Text style={styles.toolLabel}>Quality</Text> : null}
+          {postType === 'media' ? <Text style={[styles.toolLabel, { color: colors.textSecondary }]}>Quality</Text> : null}
           {postType === 'media' ? (
-          <View style={styles.segmented}>
+          <View style={[styles.segmented, { backgroundColor: colors.background }]}>
             {Object.entries(QUALITY).map(([key, option]) => (
               <TouchableOpacity
                 key={key}
-                style={[styles.segment, qualityKey === key && styles.segmentActive]}
+                style={[styles.segment, qualityKey === key && [styles.segmentActive, { backgroundColor: colors.surface, borderColor: colors.border }]]}
                 onPress={() => setQualityKey(key)}
               >
-                <Text style={[styles.segmentText, qualityKey === key && styles.segmentTextActive]}>{option.label}</Text>
+                <Text style={[styles.segmentText, { color: colors.textSecondary }, qualityKey === key && [styles.segmentTextActive, { color: colors.textPrimary }]]}>{option.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -349,17 +361,17 @@ export default function CreatePostScreen({ navigation, route }) {
 
           {postType === 'media' && mediaType === 'image' ? (
             <View style={styles.toolRow}>
-              <TouchableOpacity style={styles.toolButton} onPress={rotateImage} disabled={!media || loading}>
-                <Ionicons name="reload" size={18} color={Colors.textPrimary} />
-                <Text style={styles.toolButtonText}>Rotate</Text>
+              <TouchableOpacity style={[styles.toolButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={rotateImage} disabled={!media || loading}>
+                <Ionicons name="reload" size={18} color={colors.textPrimary} />
+                <Text style={[styles.toolButtonText, { color: colors.textPrimary }]}>Rotate</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.toolButton} onPress={flipImage} disabled={!media || loading}>
-                <Ionicons name="swap-horizontal" size={18} color={Colors.textPrimary} />
-                <Text style={styles.toolButtonText}>Flip</Text>
+              <TouchableOpacity style={[styles.toolButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={flipImage} disabled={!media || loading}>
+                <Ionicons name="swap-horizontal" size={18} color={colors.textPrimary} />
+                <Text style={[styles.toolButtonText, { color: colors.textPrimary }]}>Flip</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.toolButton} onPress={compressImage} disabled={!media || loading}>
-                <Ionicons name="resize" size={18} color={Colors.textPrimary} />
-                <Text style={styles.toolButtonText}>Apply quality</Text>
+              <TouchableOpacity style={[styles.toolButton, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={compressImage} disabled={!media || loading}>
+                <Ionicons name="resize" size={18} color={colors.textPrimary} />
+                <Text style={[styles.toolButtonText, { color: colors.textPrimary }]}>Apply quality</Text>
               </TouchableOpacity>
             </View>
           ) : postType === 'media' ? (
@@ -385,9 +397,9 @@ export default function CreatePostScreen({ navigation, route }) {
               {pollOptions.map((option, index) => (
                 <View key={index} style={styles.pollOptionRow}>
                   <TextInput
-                    style={styles.pollOptionInput}
+                    style={[styles.pollOptionInput, { borderColor: colors.border, color: colors.textPrimary, backgroundColor: colors.surface }]}
                     placeholder={`Option ${index + 1}`}
-                    placeholderTextColor={Colors.textSecondary}
+                    placeholderTextColor={colors.textSecondary}
                     value={option}
                     onChangeText={(value) => updatePollOption(index, value)}
                     maxLength={120}
@@ -423,18 +435,18 @@ export default function CreatePostScreen({ navigation, route }) {
           ) : null}
         </View>
 
-        <View style={styles.captionSection}>
+        <View style={[styles.captionSection, { borderTopColor: colors.border }]}>
           <TextInput
-            style={styles.captionInput}
+            style={[styles.captionInput, { color: colors.textPrimary }]}
             placeholder="Write a caption..."
-            placeholderTextColor={Colors.textSecondary}
+            placeholderTextColor={colors.textSecondary}
             value={caption}
             onChangeText={setCaption}
             multiline
             maxLength={5000}
             textAlignVertical="top"
           />
-          <Text style={styles.charCount}>{caption.length}/5000</Text>
+          <Text style={[styles.charCount, { color: colors.textTertiary }]}>{caption.length}/5000</Text>
         </View>
 
         <TouchableOpacity
@@ -454,6 +466,7 @@ export default function CreatePostScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
+  scrollContent: { paddingBottom: Spacing.xl },
   previewMedia: { width: '100%', aspectRatio: 1, backgroundColor: Colors.background },
   textPreview: { minHeight: 240, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background, margin: Spacing.lg, borderRadius: 12, borderWidth: 1, borderColor: Colors.border, padding: Spacing.xl },
   textPreviewTitle: { color: Colors.textPrimary, fontSize: Typography.xl, fontWeight: '800', marginTop: Spacing.md },
