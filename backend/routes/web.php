@@ -2,7 +2,6 @@
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return new JsonResponse([
@@ -24,18 +23,33 @@ Route::get('/storage/{path}', function (string $path) {
         abort(404);
     }
 
-    $disk = Storage::disk('public');
+    $basePath = storage_path('app/public');
+    $absolutePath = $basePath . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+    $realBasePath = realpath($basePath);
+    $realPath = realpath($absolutePath);
 
-    if (!$disk->exists($path)) {
+    if (!$realBasePath || !$realPath || !str_starts_with($realPath, $realBasePath) || !is_file($realPath)) {
         abort(404);
     }
 
-    $absolutePath = $disk->path($path);
-    $mimeType = $disk->mimeType($path) ?: 'application/octet-stream';
-    $fileSize = $disk->size($path);
+    $extension = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+        'mp4' => 'video/mp4',
+        'mov' => 'video/quicktime',
+        'm4a' => 'audio/mp4',
+        'mp3' => 'audio/mpeg',
+        'wav' => 'audio/wav',
+    ];
+    $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+    $fileSize = filesize($realPath);
 
-    return response()->stream(function () use ($absolutePath) {
-        $handle = fopen($absolutePath, 'rb');
+    return response()->stream(function () use ($realPath) {
+        $handle = fopen($realPath, 'rb');
         if ($handle === false) {
             return;
         }
