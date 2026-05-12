@@ -83,6 +83,9 @@ module.exports = {
     ],
     extra: {
       apiUrl,
+      eas: {
+        projectId: '786b26ea-7f67-451e-b8b5-c71c5edd10a4',
+      },
     },
   },
 };
