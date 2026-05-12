@@ -23,8 +23,8 @@ function loadDotenv(dotenvPath) {
 
 const env = loadDotenv(path.resolve(__dirname, '.env'));
 const apiUrl =
-  env.EXPO_PUBLIC_API_URL ||
   process.env.EXPO_PUBLIC_API_URL ||
+  env.EXPO_PUBLIC_API_URL ||
   'https://vee-production-76c2.up.railway.app/api';
 
 module.exports = {
