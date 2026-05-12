@@ -167,6 +167,17 @@ export default function ProfileScreen({ navigation }) {
     setReposts((prev) => prev.filter((post) => post.id !== postId));
   }, []);
 
+  const confirmLogout = useCallback(() => {
+    Alert.alert(
+      'Log out?',
+      'You will need to sign in again to use your account.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Log out', style: 'destructive', onPress: logout },
+      ]
+    );
+  }, [logout]);
+
   const Header = () => (
     <View style={[styles.headerWrap, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       <TouchableOpacity style={[styles.cover, { backgroundColor: colors.surfaceMuted || '#18212F' }]} onPress={handleCoverChange} activeOpacity={0.9}>
@@ -194,7 +205,7 @@ export default function ProfileScreen({ navigation }) {
             <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => navigation.navigate('Settings')}>
               <Ionicons name="settings-outline" size={19} color={colors.textPrimary} />
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={logout}>
+            <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={confirmLogout}>
               <Ionicons name="log-out-outline" size={19} color={colors.textPrimary} />
             </TouchableOpacity>
           </View>
