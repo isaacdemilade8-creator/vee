@@ -4,10 +4,11 @@
  */
 import React, { useCallback, useState } from 'react';
 import {
-  FlatList, StyleSheet, RefreshControl, View, Text, ActivityIndicator,
+  FlatList, StyleSheet, RefreshControl, View, Text, ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import PostCard from '../../components/post/PostCard';
 import StoriesBar from '../../components/story/StoriesBar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -19,7 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
-  const { colors } = useAppTheme();
+  const { colors, isDark } = useAppTheme();
   const { items: posts, loading, refreshing, hasMore, loadMore, refresh, setItems } =
     usePaginatedApi(PostAPI.getFeed);
   const [storyGroups, setStoryGroups] = useState([]);
@@ -63,12 +64,34 @@ export default function HomeScreen({ navigation }) {
   );
 
   const renderHeader = () => (
-    <StoriesBar
-      groups={storyGroups}
-      currentUser={user}
-      onAddStory={() => navigation.navigate('CreateTab', { mode: 'story' })}
-      onOpenStory={(group) => navigation.navigate('StoryViewer', { user: group.user, stories: group.stories })}
-    />
+    <View>
+      <LinearGradient
+        colors={isDark ? ['#10201D', '#123E39'] : ['#FFFFFF', '#E3F7F3']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.feedHero, { borderColor: colors.borderSoft || colors.border }]}
+      >
+        <View style={styles.heroTextWrap}>
+          <Text style={[styles.heroKicker, { color: colors.primary }]}>LIVE BOARD</Text>
+          <Text style={[styles.heroTitle, { color: colors.textPrimary }]}>What are you creating today?</Text>
+          <Text style={[styles.heroSubtitle, { color: colors.textSecondary }]}>Post a moment, start a stream, or discover what your circle is making.</Text>
+        </View>
+        <TouchableOpacity
+          style={[styles.heroButton, { backgroundColor: colors.textPrimary }]}
+          onPress={() => navigation.navigate('CreateTab')}
+          activeOpacity={0.9}
+        >
+          <Ionicons name="sparkles" size={16} color={colors.surface} />
+          <Text style={[styles.heroButtonText, { color: colors.surface }]}>Create</Text>
+        </TouchableOpacity>
+      </LinearGradient>
+      <StoriesBar
+        groups={storyGroups}
+        currentUser={user}
+        onAddStory={() => navigation.navigate('CreateTab', { mode: 'story' })}
+        onOpenStory={(group) => navigation.navigate('StoryViewer', { user: group.user, stories: group.stories })}
+      />
+    </View>
   );
 
   if (loading && posts.length === 0) return <LoadingSpinner />;
@@ -87,6 +110,7 @@ export default function HomeScreen({ navigation }) {
         ListFooterComponent={renderFooter}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
+        contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews
         initialNumToRender={4}
@@ -100,6 +124,14 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
+  listContent: { paddingBottom: 96 },
+  feedHero: { marginHorizontal: 14, marginTop: 10, marginBottom: 10, borderRadius: 28, borderWidth: 1, padding: 18 },
+  heroTextWrap: { paddingRight: 18 },
+  heroKicker: { fontSize: 11, fontWeight: '900', marginBottom: 8 },
+  heroTitle: { fontSize: 24, fontWeight: '900', lineHeight: 29 },
+  heroSubtitle: { fontSize: Typography.sm, fontWeight: '600', lineHeight: 19, marginTop: 8, maxWidth: 290 },
+  heroButton: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 7, height: 40, borderRadius: 20, paddingHorizontal: 15, marginTop: 16 },
+  heroButtonText: { fontSize: Typography.sm, fontWeight: '900' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 100 },
   emptyIcon: { fontSize: 48, marginBottom: 16 },
   emptyTitle: { fontSize: Typography.xl, fontWeight: '700', color: Colors.textPrimary },

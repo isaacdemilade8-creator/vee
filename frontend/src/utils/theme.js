@@ -5,60 +5,67 @@ import { usePreferences } from '../context/PreferencesContext';
  * utils/theme.js
  *
  * Design tokens for the Vee app.
- * Instagram-inspired but with a cleaner, more modern feel.
+ * A bright social palette with editorial surfaces and polished contrast.
  */
 
 export const Colors = {
   // Brand
-  primary:       '#E1306C', // Instagram pink-red
-  primaryLight:  '#F77737', // Gradient orange
-  secondary:     '#405DE6', // Instagram purple-blue
-  gradient:      ['#833AB4', '#FD1D1D', '#FCAF45'], // Classic IG gradient
+  primary:       '#00A99D',
+  primaryLight:  '#54D6C7',
+  primarySoft:   '#DDF8F4',
+  secondary:     '#FF6B4A',
+  accent:        '#F8C945',
+  gradient:      ['#00A99D', '#54D6C7', '#F8C945'],
 
   // Neutrals
   white:         '#FFFFFF',
-  black:         '#000000',
-  background:    '#FAFAFA',
+  black:         '#071013',
+  background:    '#F4F7F5',
   surface:       '#FFFFFF',
-  border:        '#DBDBDB',
+  surfaceElevated: '#FFFFFF',
+  surfaceMuted:  '#EAF1EE',
+  input:         '#EDF3F0',
+  border:        '#D9E4DF',
+  borderSoft:    '#E8EFEC',
 
   // Text
-  textPrimary:   '#262626',
-  textSecondary: '#8E8E8E',
-  textTertiary:  '#C7C7C7',
+  textPrimary:   '#10201D',
+  textSecondary: '#65746F',
+  textTertiary:  '#A5B0AC',
   textOnDark:    '#FFFFFF',
 
   // Semantic
-  error:         '#ED4956',
-  success:       '#70C050',
-  warning:       '#F7C900',
-  info:          '#405DE6',
+  error:         '#F04E5E',
+  success:       '#19A974',
+  warning:       '#F8C945',
+  info:          '#3E7CB1',
 
   // Story ring gradient
-  storyGradient: ['#F58529', '#DD2A7B', '#8134AF', '#515BD4'],
+  storyGradient: ['#00A99D', '#F8C945', '#FF6B4A'],
 };
 
 export const DarkColors = {
   ...Colors,
-  background: '#08090B',
-  surface: '#111317',
-  surfaceElevated: '#181B21',
-  surfaceMuted: '#20242B',
-  input: '#191C22',
-  border: '#2B3038',
-  borderSoft: '#20242B',
-  textPrimary: '#F2F4F7',
-  textSecondary: '#A8B0BA',
-  textTertiary: '#69727F',
-  primary: '#FF4D86',
-  primaryLight: '#FF9B65',
-  primarySoft: '#351824',
-  secondary: '#8EA0FF',
+  background: '#071013',
+  surface: '#101B1A',
+  surfaceElevated: '#162422',
+  surfaceMuted: '#20312E',
+  input: '#172522',
+  border: '#29403B',
+  borderSoft: '#1E312D',
+  textPrimary: '#F2FAF8',
+  textSecondary: '#A8B9B4',
+  textTertiary: '#667C76',
+  primary: '#54D6C7',
+  primaryLight: '#8AE8DD',
+  primarySoft: '#113A36',
+  secondary: '#FF8A6E',
+  accent: '#F8C945',
   error: '#FF6675',
-  success: '#82D883',
-  warning: '#FFD166',
-  info: '#8EA0FF',
-  storyGradient: ['#FF9B65', '#FF4D86', '#8EA0FF'],
+  success: '#80D8B4',
+  warning: '#F8C945',
+  info: '#8ABFEA',
+  storyGradient: ['#54D6C7', '#F8C945', '#FF8A6E'],
 };
 
 export function getThemeColors(theme = 'light', systemScheme = 'light') {

@@ -60,7 +60,7 @@ export default function LoginScreen({ navigation }) {
       >
         <View style={styles.logoContainer}>
           <LinearGradient
-            colors={["#833AB4", "#FD1D1D", "#FCAF45"]}
+            colors={colors.storyGradient || Colors.storyGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.logoGradient}
@@ -74,7 +74,7 @@ export default function LoginScreen({ navigation }) {
             Vee
           </Text>
           <Text style={[styles.tagline, { color: colors.textSecondary }]}>
-            Share your world
+            Create your corner
           </Text>
         </View>
 
@@ -185,7 +185,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: Colors.textPrimary,
-    letterSpacing: -0.5,
   },
   tagline: {
     fontSize: Typography.sm,

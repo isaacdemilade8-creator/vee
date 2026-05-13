@@ -3,11 +3,12 @@
  * Root navigator - switches between Auth and Main app flows.
  */
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { Colors, useAppTheme } from '../utils/theme';
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -25,7 +26,6 @@ import StoryViewerScreen from '../screens/main/StoryViewerScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import PostAnalyticsScreen from '../screens/main/PostAnalyticsScreen';
 import LiveScreen from '../screens/main/LiveScreen';
-import { Image } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -47,12 +47,17 @@ function HomeStack() {
         options={({ navigation }) => ({
           headerTitle: () => (
             <View style={styles.brandTitle}>
-              <View style={styles.brandMark}>
-                <Text><Image source={require("../assets/vtwo.png")} style={{ height: 100, width: 100, borderRadius: 50 }} /></Text>
-              </View>
+              <LinearGradient
+                colors={colors.storyGradient || Colors.storyGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.brandMark}
+              >
+                <Image source={require('../assets/vtwo.png')} style={styles.brandImage} />
+              </LinearGradient>
               <View>
-                <Text style={[styles.brandName, { color: colors.textPrimary }]}>Vee</Text>
-                <Text style={[styles.brandSub, { color: colors.textSecondary }]}>Today on your feed</Text>
+                <Text style={[styles.brandName, { color: colors.textPrimary }]}>Vee Studio</Text>
+                <Text style={[styles.brandSub, { color: colors.textSecondary }]}>Fresh drops today</Text>
               </View>
             </View>
           ),
@@ -140,40 +145,61 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: isDark ? colors.textPrimary : Colors.black,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: styles.tabLabel,
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          borderTopColor: colors.border,
-          borderTopWidth: 0.5,
-          backgroundColor: colors.surface,
-          height: 56,
-          paddingBottom: 6,
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: 14,
+          borderTopWidth: 0,
+          borderRadius: 28,
+          backgroundColor: isDark ? 'rgba(16, 27, 26, 0.96)' : 'rgba(255, 255, 255, 0.96)',
+          height: 64,
+          paddingBottom: 8,
+          paddingTop: 8,
+          shadowColor: '#071013',
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: isDark ? 0.35 : 0.12,
+          shadowRadius: 18,
+          elevation: 10,
         },
         tabBarIcon: ({ focused, color }) => {
           const icons = {
-            HomeTab:          focused ? 'home'          : 'home-outline',
-            SearchTab:        focused ? 'search'        : 'search-outline',
-            CreateTab:        focused ? 'add-circle'    : 'add-circle-outline',
-            InboxTab:         focused ? 'paper-plane'   : 'paper-plane-outline',
-            ProfileTab:       focused ? 'person'        : 'person-outline',
+            HomeTab:          focused ? 'planet'        : 'planet-outline',
+            SearchTab:        focused ? 'compass'       : 'compass-outline',
+            CreateTab:        focused ? 'sparkles'      : 'sparkles-outline',
+            InboxTab:         focused ? 'chatbubbles'   : 'chatbubbles-outline',
+            ProfileTab:       focused ? 'person-circle' : 'person-circle-outline',
           };
+          if (route.name === 'CreateTab') {
+            return (
+              <LinearGradient
+                colors={colors.storyGradient || Colors.storyGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.createTab}
+              >
+                <Ionicons name={icons[route.name]} size={22} color={Colors.white} />
+              </LinearGradient>
+            );
+          }
           return (
-            <Ionicons
-              name={icons[route.name]}
-              size={route.name === 'CreateTab' ? 32 : 26}
-              color={route.name === 'CreateTab' ? colors.primary : color}
-            />
+            <View style={[styles.tabIconWrap, focused && { backgroundColor: colors.primarySoft || colors.surfaceMuted }]}>
+              <Ionicons name={icons[route.name]} size={22} color={color} />
+            </View>
           );
         },
       })}
     >
-      <Tab.Screen name="HomeTab" component={HomeStack} />
-      <Tab.Screen name="SearchTab" component={SearchStack} />
+      <Tab.Screen name="HomeTab" component={HomeStack} options={{ tabBarLabel: 'Feed' }} />
+      <Tab.Screen name="SearchTab" component={SearchStack} options={{ tabBarLabel: 'Discover' }} />
       <Tab.Screen name="CreateTab" component={CreatePostScreen}
-        options={{ headerShown: true, title: 'New Post' }} />
-      <Tab.Screen name="InboxTab" component={InboxStack} />
-      <Tab.Screen name="ProfileTab" component={ProfileStack} />
+        options={{ headerShown: true, title: 'Create', tabBarLabel: 'Make' }} />
+      <Tab.Screen name="InboxTab" component={InboxStack} options={{ tabBarLabel: 'Talk' }} />
+      <Tab.Screen name="ProfileTab" component={ProfileStack} options={{ tabBarLabel: 'You' }} />
     </Tab.Navigator>
   );
 }
@@ -208,9 +234,13 @@ export default function AppNavigator() {
 
 const styles = StyleSheet.create({
   brandTitle: { flexDirection: 'row', alignItems: 'center' },
-  brandMark: { width: 34, height: 34, borderRadius: 17, backgroundColor: Colors.primary, alignItems: 'center', justifyContent: 'center', marginRight: 8 },
+  brandMark: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', marginRight: 9, padding: 2 },
+  brandImage: { height: 30, width: 30, borderRadius: 15 },
   brandName: { color: Colors.textPrimary, fontWeight: '900', fontSize: 18 },
   brandSub: { color: Colors.textSecondary, fontWeight: '700', fontSize: 11, marginTop: 1 },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  headerIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border },
+  headerIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border },
+  tabIconWrap: { width: 34, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  tabLabel: { fontSize: 10, fontWeight: '800', marginTop: 1 },
+  createTab: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
 });
