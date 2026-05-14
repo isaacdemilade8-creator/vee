@@ -8,6 +8,7 @@ import {
   Image, Text, TouchableOpacity, View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { FollowAPI, InboxAPI, StoryAPI, UserAPI } from '../../api/services';
 import { normalizeMediaUrl } from '../../api/client';
@@ -26,6 +27,7 @@ export default function UserProfileScreen({ route, navigation }) {
   const { username } = route.params;
   const { user: authUser } = useAuth();
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
   const [reposts, setReposts] = useState([]);
@@ -213,6 +215,7 @@ export default function UserProfileScreen({ route, navigation }) {
           </Text>
         </View>
       }
+      contentContainerStyle={{ paddingBottom: tabBarHeight + Spacing.xl }}
       style={[styles.container, { backgroundColor: colors.background }]}
     />
   );

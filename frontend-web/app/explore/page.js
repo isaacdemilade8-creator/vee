@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { FiSearch } from 'react-icons/fi';
 import AppShell from '@/components/AppShell';
 import FeedList from '@/components/FeedList';
 import { DiscoveryAPI } from '@/lib/api';
@@ -23,8 +24,10 @@ export default function ExplorePage() {
           <h1>Explore</h1>
           <p>Search users, captions, and hashtags.</p>
         </div>
+        <span className="header-icon"><FiSearch aria-hidden /></span>
       </header>
-      <form className="panel" onSubmit={(event) => { event.preventDefault(); setSubmitted(query.trim()); }}>
+      <form className="panel search-panel" onSubmit={(event) => { event.preventDefault(); setSubmitted(query.trim()); }}>
+        <FiSearch aria-hidden />
         <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search Vee" />
       </form>
       <div style={{ height: 14 }} />

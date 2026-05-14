@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Dimensions, Alert, Share,
+  Alert, Share, useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,11 +19,12 @@ import { LikeAPI, PostAPI } from '../../api/services';
 import { Colors, Typography, Spacing, useAppTheme } from '../../utils/theme';
 import { useAuth } from '../../context/AuthContext';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 function PostCard({ post, navigation, onDelete }) {
   const { user: authUser } = useAuth();
   const { colors } = useAppTheme();
+  const { width: windowWidth } = useWindowDimensions();
+  const cardWidth = Math.min(windowWidth - 28, 620);
+  const mediaSize = cardWidth - (Spacing.sm * 2);
   const [liked, setLiked] = useState(post.is_liked);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [reposted, setReposted] = useState(post.is_reposted);
@@ -144,7 +145,7 @@ function PostCard({ post, navigation, onDelete }) {
   const isPollPost = post.post_type === 'poll' || post.media_type === 'poll';
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.borderSoft || colors.border }]}>
+    <View style={[styles.container, { width: cardWidth, backgroundColor: colors.surface, borderColor: colors.borderSoft || colors.border }]}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
@@ -194,7 +195,7 @@ function PostCard({ post, navigation, onDelete }) {
           <MediaView
             uri={post.media_url || post.image_url}
             type={post.media_type || 'image'}
-            style={styles.image}
+            style={[styles.image, { width: mediaSize, height: mediaSize }]}
           />
           <LinearGradient
             colors={['rgba(0,0,0,0.34)', 'rgba(0,0,0,0)']}
@@ -296,7 +297,7 @@ function PostCard({ post, navigation, onDelete }) {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: Colors.white, marginHorizontal: 14, marginBottom: 16, borderWidth: 1, borderColor: Colors.border, borderRadius: 28, overflow: 'hidden' },
+  container: { alignSelf: 'center', backgroundColor: Colors.white, marginBottom: 16, borderWidth: 1, borderColor: Colors.border, borderRadius: 28, overflow: 'hidden' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: Spacing.sm },
   userInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   avatarTap: { marginRight: Spacing.sm },
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
   dot: { width: 3, height: 3, borderRadius: 1.5 },
   moreButton: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
   mediaFrame: { marginHorizontal: Spacing.sm, borderRadius: 24, overflow: 'hidden', backgroundColor: Colors.background },
-  image: { width: SCREEN_WIDTH - 44, height: SCREEN_WIDTH - 44, backgroundColor: Colors.background },
+  image: { backgroundColor: Colors.background },
   mediaShade: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 110 },
   textPost: { minHeight: 190, marginHorizontal: Spacing.sm, borderRadius: 24, backgroundColor: Colors.background, justifyContent: 'center', padding: Spacing.xl },
   textPostBody: { color: Colors.textPrimary, fontSize: Typography.xl, fontWeight: '700', lineHeight: 28, textAlign: 'center' },

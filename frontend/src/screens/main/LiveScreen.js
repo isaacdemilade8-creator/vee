@@ -15,6 +15,7 @@ import { AudioSession, isTrackReference, LiveKitRoom, useTracks, VideoTrack } fr
 import { Track } from 'livekit-client';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { LiveAPI } from '../../api/services';
 import Avatar from '../../components/common/Avatar';
 import { BorderRadius, Colors, Spacing, Typography, useAppTheme } from '../../utils/theme';
@@ -46,6 +47,7 @@ function RoomView({ colors }) {
 
 export default function LiveScreen({ navigation }) {
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const [streams, setStreams] = useState([]);
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,7 @@ export default function LiveScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['bottom']}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
         <View style={[styles.startPanel, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={[styles.iconWrap, { backgroundColor: colors.primarySoft || colors.background }]}>
             <Ionicons name="radio-outline" size={24} color={colors.primary} />
@@ -186,6 +188,7 @@ export default function LiveScreen({ navigation }) {
             placeholder="Title optional"
             placeholderTextColor={colors.textSecondary}
             style={[styles.input, { backgroundColor: colors.input || colors.background, borderColor: colors.border, color: colors.textPrimary }]}
+            blurOnSubmit={false}
             maxLength={120}
           />
           <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.primary }]} onPress={startLive} disabled={busy} activeOpacity={0.85}>
@@ -211,7 +214,10 @@ export default function LiveScreen({ navigation }) {
           <FlatList
             data={streams}
             keyExtractor={(item) => String(item.id)}
-            contentContainerStyle={streams.length === 0 ? styles.emptyList : styles.list}
+            contentContainerStyle={[
+              streams.length === 0 ? styles.emptyList : styles.list,
+              { paddingBottom: tabBarHeight + Spacing.xl },
+            ]}
             ListEmptyComponent={
               <View style={styles.emptyState}>
                 <Ionicons name="radio-outline" size={38} color={colors.textTertiary} />

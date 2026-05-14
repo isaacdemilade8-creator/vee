@@ -7,6 +7,7 @@ import {
   FlatList, StyleSheet, RefreshControl, View, Text, ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import PostCard from '../../components/post/PostCard';
@@ -21,6 +22,7 @@ import { Ionicons } from '@expo/vector-icons';
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
   const { colors, isDark } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const { items: posts, loading, refreshing, hasMore, loadMore, refresh, setItems } =
     usePaginatedApi(PostAPI.getFeed);
   const [storyGroups, setStoryGroups] = useState([]);
@@ -110,7 +112,7 @@ export default function HomeScreen({ navigation }) {
         ListFooterComponent={renderFooter}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: tabBarHeight + 24 }]}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews
         initialNumToRender={4}
@@ -124,7 +126,7 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  listContent: { paddingBottom: 96 },
+  listContent: {},
   feedHero: { marginHorizontal: 14, marginTop: 10, marginBottom: 10, borderRadius: 28, borderWidth: 1, padding: 18 },
   heroTextWrap: { paddingRight: 18 },
   heroKicker: { fontSize: 11, fontWeight: '900', marginBottom: 8 },

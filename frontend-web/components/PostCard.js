@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { FiBarChart2, FiHeart, FiMessageCircle, FiRepeat, FiSend } from 'react-icons/fi';
+import { FaHeart } from 'react-icons/fa';
 import { PostAPI } from '@/lib/api';
 import Avatar from './Avatar';
 import MediaView from './MediaView';
@@ -50,9 +52,13 @@ export default function PostCard({ post }) {
 
       <div className="post-body">
         <div className="actions">
-          <button className="chip" type="button" onClick={like}>{liked ? 'Liked' : 'Like'} {likes}</button>
-          <Link className="chip" href={`/posts/${post.id}`}>Comments {post.comments_count || 0}</Link>
-          <button className="chip" type="button" onClick={repost}>Repost {reposts}</button>
+          <button className={`chip ${liked ? 'chip-hot' : ''}`} type="button" onClick={like}>
+            {liked ? <FaHeart aria-hidden /> : <FiHeart aria-hidden />} {likes}
+          </button>
+          <Link className="chip" href={`/posts/${post.id}`}><FiMessageCircle aria-hidden /> {post.comments_count || 0}</Link>
+          <button className="chip" type="button" onClick={repost}><FiRepeat aria-hidden /> {reposts}</button>
+          <button className="chip" type="button"><FiSend aria-hidden /> Share</button>
+          {post.is_owner ? <Link className="chip" href={`/posts/${post.id}`}><FiBarChart2 aria-hidden /> Stats</Link> : null}
         </div>
 
         {post.caption && post.media_type !== 'text' && post.post_type !== 'text' ? (

@@ -1,4 +1,5 @@
 import { normalizeMediaUrl } from '@/lib/api';
+import { FiBarChart2, FiFileText, FiImage, FiMusic } from 'react-icons/fi';
 
 export default function MediaView({ post, className = 'media' }) {
   const url = normalizeMediaUrl(post?.media_url || post?.image_url);
@@ -10,7 +11,8 @@ export default function MediaView({ post, className = 'media' }) {
 
   if (type === 'audio' && url) {
     return (
-      <div className="panel">
+      <div className="audio-panel">
+        <FiMusic aria-hidden />
         <audio src={url} controls style={{ width: '100%' }} />
       </div>
     );
@@ -22,6 +24,7 @@ export default function MediaView({ post, className = 'media' }) {
 
   return (
     <div className="text-post">
+      {type === 'poll' ? <FiBarChart2 aria-hidden /> : type === 'text' ? <FiFileText aria-hidden /> : <FiImage aria-hidden />}
       {post?.caption || (type === 'poll' ? 'Poll post' : 'Text post')}
     </div>
   );

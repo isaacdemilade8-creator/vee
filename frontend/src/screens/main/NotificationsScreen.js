@@ -7,6 +7,7 @@ import {
   View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { usePaginatedApi } from '../../hooks/useApi';
 import { NotificationAPI } from '../../api/services';
@@ -21,6 +22,7 @@ const ICON_MAP = {
 
 export default function NotificationsScreen() {
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const { items, loading, refreshing, loadMore, refresh } = usePaginatedApi(NotificationAPI.getAll);
 
   useFocusEffect(useCallback(() => {
@@ -53,6 +55,7 @@ export default function NotificationsScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.primary} />}
       onEndReached={loadMore}
       onEndReachedThreshold={0.4}
+      contentContainerStyle={{ paddingBottom: tabBarHeight + Spacing.xl }}
       style={[styles.container, { backgroundColor: colors.background }]}
       ListEmptyComponent={
         <View style={styles.empty}>

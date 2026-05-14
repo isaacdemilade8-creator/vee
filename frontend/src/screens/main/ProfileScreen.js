@@ -8,6 +8,7 @@ import {
   Image, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
@@ -26,6 +27,7 @@ const TABS = [
 export default function ProfileScreen({ navigation }) {
   const { user, logout, refreshUser, updateUser } = useAuth();
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const [posts, setPosts] = useState([]);
   const [reposts, setReposts] = useState([]);
   const [activeTab, setActiveTab] = useState('posts');
@@ -223,6 +225,7 @@ export default function ProfileScreen({ navigation }) {
               onChangeText={setFullName}
               placeholder="Full name"
               placeholderTextColor={colors.textSecondary}
+              blurOnSubmit={false}
             />
             <TextInput
               style={[styles.input, styles.bioInput, { backgroundColor: colors.input || colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
@@ -231,6 +234,7 @@ export default function ProfileScreen({ navigation }) {
               placeholder="Bio"
               placeholderTextColor={colors.textSecondary}
               multiline
+              blurOnSubmit={false}
               textAlignVertical="top"
             />
           </View>
@@ -306,6 +310,7 @@ export default function ProfileScreen({ navigation }) {
           </View>
         )
       }
+      contentContainerStyle={{ paddingBottom: tabBarHeight + Spacing.xl }}
       style={[styles.container, { backgroundColor: colors.background }]}
     />
   );

@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { FiCompass, FiHome, FiLogOut, FiMessageCircle, FiPlusSquare, FiUser } from 'react-icons/fi';
 import { useAuth } from '@/lib/auth';
 import Avatar from './Avatar';
 
 const navItems = [
-  { href: '/', label: 'Feed', icon: 'F' },
-  { href: '/explore', label: 'Explore', icon: 'E' },
-  { href: '/create', label: 'Create', icon: 'C' },
-  { href: '/messages', label: 'Messages', icon: 'M' },
-  { href: '/profile', label: 'Profile', icon: 'P' }
+  { href: '/', label: 'Feed', icon: FiHome },
+  { href: '/explore', label: 'Explore', icon: FiCompass },
+  { href: '/create', label: 'Create', icon: FiPlusSquare },
+  { href: '/messages', label: 'Messages', icon: FiMessageCircle },
+  { href: '/profile', label: 'Profile', icon: FiUser }
 ];
 
 function isActive(pathname, href) {
@@ -42,11 +43,11 @@ export default function AppShell({ children, aside }) {
         <nav className="nav">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} className={isActive(pathname, item.href) ? 'active' : ''}>
-              <span className="brand-mark" style={{ width: 24, height: 24, borderRadius: 6, fontSize: 12 }}>{item.icon}</span>
+              <item.icon aria-hidden />
               {item.label}
             </Link>
           ))}
-          <button type="button" onClick={handleLogout}>Log out</button>
+          <button type="button" onClick={handleLogout}><FiLogOut aria-hidden /> Log out</button>
         </nav>
       </aside>
 
@@ -69,7 +70,8 @@ export default function AppShell({ children, aside }) {
       <nav className="mobile-tabs">
         {navItems.map((item) => (
           <Link key={item.href} href={item.href} className={isActive(pathname, item.href) ? 'active' : ''}>
-            {item.label}
+            <item.icon aria-hidden />
+            <span>{item.label}</span>
           </Link>
         ))}
       </nav>

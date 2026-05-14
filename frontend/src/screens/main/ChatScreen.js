@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator, FlatList, KeyboardAvoidingView, Platform,
-  StyleSheet, Text, TextInput, TouchableOpacity, View,
+  Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import { InboxAPI } from '../../api/services';
@@ -13,11 +14,13 @@ import { Colors, BorderRadius, Spacing, Typography, useAppTheme } from '../../ut
 export default function ChatScreen({ route, navigation }) {
   const { conversationId, user } = route.params;
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const { colors } = useAppTheme();
   const [messages, setMessages] = useState([]);
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const loadMessages = useCallback(async () => {
     try {
@@ -31,6 +34,15 @@ export default function ChatScreen({ route, navigation }) {
   }, [conversationId]);
 
   useEffect(() => { loadMessages(); }, [loadMessages]);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const send = async () => {
     if (!body.trim() || sending) return;
@@ -68,7 +80,7 @@ export default function ChatScreen({ route, navigation }) {
       </View>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
       >
         {loading ? (
@@ -80,11 +92,11 @@ export default function ChatScreen({ route, navigation }) {
             renderItem={renderMessage}
             inverted
             contentContainerStyle={styles.list}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="interactive"
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="none"
           />
         )}
-        <View style={[styles.composer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+        <View style={[styles.composer, { backgroundColor: colors.surface, borderTopColor: colors.border, marginBottom: keyboardVisible ? 0 : tabBarHeight }]}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.background, color: colors.textPrimary }]}
             value={body}
@@ -92,6 +104,7 @@ export default function ChatScreen({ route, navigation }) {
             placeholder="Message..."
             placeholderTextColor={colors.textSecondary}
             multiline
+            blurOnSubmit={false}
             maxLength={2000}
           />
           <TouchableOpacity style={styles.sendButton} onPress={send} disabled={!body.trim() || sending}>

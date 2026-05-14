@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { FiUserPlus } from 'react-icons/fi';
 import { useAuth } from '@/lib/auth';
 
 export default function RegisterPage() {
@@ -45,7 +46,7 @@ export default function RegisterPage() {
         <label className="field"><span>Email</span><input className="input" type="email" value={form.email} onChange={update('email')} autoComplete="email" /></label>
         <label className="field"><span>Password</span><input className="input" type="password" value={form.password} onChange={update('password')} autoComplete="new-password" /></label>
         <label className="field"><span>Confirm password</span><input className="input" type="password" value={form.password_confirmation} onChange={update('password_confirmation')} autoComplete="new-password" /></label>
-        <button className="btn" disabled={loading}>{loading ? 'Creating...' : 'Sign up'}</button>
+        <button className="btn" disabled={loading}><FiUserPlus aria-hidden /> {loading ? 'Creating...' : 'Sign up'}</button>
         {error ? <p className="form-error">{error}</p> : null}
         <p className="muted">Already have an account? <Link href="/login"><strong>Log in</strong></Link></p>
       </form>

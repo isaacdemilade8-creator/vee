@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { FiRadio } from 'react-icons/fi';
 import AppShell from '@/components/AppShell';
 import FeedList from '@/components/FeedList';
 import { PostAPI } from '@/lib/api';
@@ -19,6 +20,7 @@ export default function FeedPage() {
           <h1>Feed</h1>
           <p>Fresh posts from your circle.</p>
         </div>
+        <span className="header-icon"><FiRadio aria-hidden /></span>
       </header>
       <FeedList loader={loadFeed} empty="No posts yet. Create the first one." />
     </AppShell>

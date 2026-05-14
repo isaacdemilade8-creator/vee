@@ -145,6 +145,7 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarShowLabel: true,
         tabBarLabelStyle: styles.tabLabel,
         tabBarActiveTintColor: colors.primary,

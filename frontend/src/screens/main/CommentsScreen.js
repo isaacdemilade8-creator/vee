@@ -5,10 +5,11 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import Avatar from '../../components/common/Avatar';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
@@ -21,11 +22,13 @@ export default function CommentsScreen({ route }) {
   const { postId } = route.params;
   const { user } = useAuth();
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const { colors } = useAppTheme();
   const [comments, setComments] = useState([]);
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const inputRef = useRef(null);
 
   const fetchComments = useCallback(async () => {
@@ -36,6 +39,15 @@ export default function CommentsScreen({ route }) {
   }, [postId]);
 
   useEffect(() => { fetchComments(); }, [fetchComments]);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const handleSubmit = async () => {
     if (!body.trim()) return;
@@ -88,7 +100,7 @@ export default function CommentsScreen({ route }) {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]} edges={["bottom"]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
       >
         {loading
@@ -99,8 +111,8 @@ export default function CommentsScreen({ route }) {
               keyExtractor={(item) => String(item.id)}
               renderItem={renderComment}
               contentContainerStyle={styles.list}
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="interactive"
+              keyboardShouldPersistTaps="always"
+              keyboardDismissMode="none"
               ListEmptyComponent={
                 <View style={styles.empty}>
                   <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No comments yet. Be the first!</Text>
@@ -108,7 +120,7 @@ export default function CommentsScreen({ route }) {
               }
             />
           )}
-        <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+        <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border, marginBottom: keyboardVisible ? 0 : tabBarHeight }]}>
           <Avatar uri={user?.avatar_url} username={user?.username} size={32} />
           <TextInput
             ref={inputRef}
@@ -118,6 +130,7 @@ export default function CommentsScreen({ route }) {
             value={body}
             onChangeText={setBody}
             multiline
+            blurOnSubmit={false}
             maxLength={500}
           />
           <TouchableOpacity onPress={handleSubmit} disabled={!body.trim() || submitting} style={styles.sendBtn}>

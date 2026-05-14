@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { FiImage, FiSend } from 'react-icons/fi';
 import AppShell from '@/components/AppShell';
 import { PostAPI } from '@/lib/api';
 import { useProtected } from '@/lib/useProtected';
@@ -42,6 +43,7 @@ export default function CreatePage() {
           <h1>Create</h1>
           <p>Post text, photos, video, or audio to the same backend.</p>
         </div>
+        <span className="header-icon"><FiImage aria-hidden /></span>
       </header>
       <form className="composer-card" style={{ padding: 16 }} onSubmit={submit}>
         <label className="field">
@@ -52,7 +54,7 @@ export default function CreatePage() {
           <span>Media</span>
           <input className="input" type="file" accept="image/*,video/*,audio/*" onChange={(e) => setMedia(e.target.files?.[0] || null)} />
         </label>
-        <button className="btn" disabled={busy || (!caption.trim() && !media)}>{busy ? 'Posting...' : 'Share post'}</button>
+        <button className="btn" disabled={busy || (!caption.trim() && !media)}><FiSend aria-hidden /> {busy ? 'Posting...' : 'Share post'}</button>
         {error ? <p className="form-error">{error}</p> : null}
       </form>
     </AppShell>

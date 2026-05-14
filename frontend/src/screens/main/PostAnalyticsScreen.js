@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import { PostAPI } from '../../api/services';
 import { Colors, BorderRadius, Spacing, Typography } from '../../utils/theme';
@@ -8,6 +9,7 @@ import { formatDistanceToNow } from '../../utils/dateUtils';
 
 export default function PostAnalyticsScreen({ route }) {
   const { postId } = route.params;
+  const tabBarHeight = useBottomTabBarHeight();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +33,7 @@ export default function PostAnalyticsScreen({ route }) {
   return (
     <FlatList
       style={styles.container}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + Spacing.xl }]}
       data={analytics.recent_comments || []}
       keyExtractor={(item) => String(item.id)}
       ListHeaderComponent={

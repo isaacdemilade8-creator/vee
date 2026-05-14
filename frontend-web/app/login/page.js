@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { FiLogIn } from 'react-icons/fi';
 import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
@@ -45,7 +46,7 @@ export default function LoginPage() {
           <span>Password</span>
           <input className="input" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} autoComplete="current-password" />
         </label>
-        <button className="btn" disabled={loading}>{loading ? 'Signing in...' : 'Log in'}</button>
+        <button className="btn" disabled={loading}><FiLogIn aria-hidden /> {loading ? 'Signing in...' : 'Log in'}</button>
         {error ? <p className="form-error">{error}</p> : null}
         <p className="muted">New here? <Link href="/register"><strong>Create an account</strong></Link></p>
       </form>

@@ -4,20 +4,24 @@
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
-  View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Dimensions,
+  View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, useWindowDimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { DiscoveryAPI, InboxAPI, UserAPI } from '../../api/services';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import MediaView from '../../components/common/MediaView';
 import { Colors, Typography, Spacing, BorderRadius, useAppTheme } from '../../utils/theme';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const GRID_SIZE = (SCREEN_WIDTH - (Spacing.md * 2) - 8) / 2;
 const FALLBACK_CATEGORIES = ['trending', 'entertainment', 'education', 'sports', 'technology', 'lifestyle'];
 
 export default function SearchScreen({ route, navigation }) {
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
+  const { width } = useWindowDimensions();
+  const gridColumns = width >= 720 ? 3 : 2;
+  const gridGap = 8;
+  const gridSize = (width - (Spacing.md * 2) - (gridGap * (gridColumns - 1))) / gridColumns;
   const [query, setQuery] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [postResults, setPostResults] = useState([]);
@@ -154,14 +158,14 @@ export default function SearchScreen({ route, navigation }) {
 
   const renderPost = ({ item }) => (
     <TouchableOpacity
-      style={[styles.postCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      style={[styles.postCard, { width: gridSize, backgroundColor: colors.surface, borderColor: colors.border }]}
       onPress={() => navigation.navigate('Comments', { postId: item.id })}
       activeOpacity={0.9}
     >
       <MediaView
         uri={item.media_url || item.image_url}
         type={item.media_type || 'image'}
-        style={styles.postMedia}
+        style={[styles.postMedia, { height: gridSize }]}
         nativeControls={false}
       />
       <View style={styles.postMeta}>
@@ -252,8 +256,8 @@ export default function SearchScreen({ route, navigation }) {
             data={listData}
             keyExtractor={(item) => String(item.type ? `${item.type}-${item.id}` : item.id)}
             renderItem={showingSearch ? renderSearchItem : renderPost}
-            numColumns={showingSearch ? 1 : 2}
-            key={showingSearch ? 'search' : 'posts'}
+            numColumns={showingSearch ? 1 : gridColumns}
+            key={showingSearch ? 'search' : `posts-${gridColumns}`}
             columnWrapperStyle={!showingSearch ? styles.postRow : undefined}
             ListHeaderComponent={!showingSearch ? (
               <View>
@@ -283,6 +287,9 @@ export default function SearchScreen({ route, navigation }) {
                 </View>
               ) : null
             }
+            contentContainerStyle={{ paddingBottom: tabBarHeight + Spacing.xl }}
+            keyboardShouldPersistTaps="always"
+            keyboardDismissMode="none"
           />
         )}
     </View>
@@ -303,8 +310,8 @@ const styles = StyleSheet.create({
   categoryCount: { color: Colors.textSecondary, fontSize: Typography.xs, fontWeight: '700' },
   categoryHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: Spacing.md },
   postRow: { paddingHorizontal: Spacing.md, gap: 8 },
-  postCard: { width: GRID_SIZE, marginBottom: Spacing.md, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: BorderRadius.md, overflow: 'hidden' },
-  postMedia: { width: '100%', height: GRID_SIZE, backgroundColor: Colors.background },
+  postCard: { marginBottom: Spacing.md, backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: BorderRadius.md, overflow: 'hidden' },
+  postMedia: { width: '100%', backgroundColor: Colors.background },
   postMeta: { flexDirection: 'row', alignItems: 'center', padding: Spacing.sm },
   postUsername: { flex: 1, marginLeft: Spacing.sm, fontSize: Typography.sm, fontWeight: '700', color: Colors.textPrimary },
   postTagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: Spacing.sm, paddingBottom: Spacing.sm },

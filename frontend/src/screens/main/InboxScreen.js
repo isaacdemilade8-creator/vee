@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileAvatar from '../../components/common/ProfileAvatar';
 import { InboxAPI } from '../../api/services';
@@ -9,6 +10,7 @@ import { formatDistanceToNow } from '../../utils/dateUtils';
 
 export default function InboxScreen({ navigation }) {
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -73,6 +75,7 @@ export default function InboxScreen({ navigation }) {
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Open a profile and tap Message to start a DM.</Text>
         </View>
       }
+      contentContainerStyle={{ paddingBottom: tabBarHeight + Spacing.xl }}
       style={[styles.container, { backgroundColor: colors.background }]}
     />
   );

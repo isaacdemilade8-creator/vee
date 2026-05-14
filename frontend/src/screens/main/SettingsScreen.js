@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { usePreferences } from '../../context/PreferencesContext';
 import { Colors, BorderRadius, Spacing, Typography, useAppTheme } from '../../utils/theme';
 
@@ -13,6 +14,7 @@ const FONT_OPTIONS = [
 export default function SettingsScreen() {
   const { preferences, updatePreference } = usePreferences();
   const { colors } = useAppTheme();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const ToggleRow = ({ icon, label, description, value, onValueChange }) => (
     <View style={styles.row}>
@@ -26,7 +28,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + Spacing.xl }]}>
       <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Display</Text>
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <View style={styles.row}>

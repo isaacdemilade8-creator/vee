@@ -8,6 +8,7 @@ import {
   ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as DocumentPicker from 'expo-document-picker';
@@ -39,6 +40,7 @@ const POST_TYPES = [
 
 export default function CreatePostScreen({ navigation, route }) {
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const { colors } = useAppTheme();
   const initialMode = route?.params?.mode === 'story' ? 'story' : 'post';
   const [shareMode, setShareMode] = useState(initialMode);
@@ -242,14 +244,14 @@ export default function CreatePostScreen({ navigation, route }) {
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.surface }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="none"
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: tabBarHeight + Spacing.xl }]}
       >
         {postType === 'text' || postType === 'poll' ? (
           <View style={[styles.textPreview, { backgroundColor: colors.background, borderColor: colors.border }]}>
@@ -402,6 +404,7 @@ export default function CreatePostScreen({ navigation, route }) {
                     placeholderTextColor={colors.textSecondary}
                     value={option}
                     onChangeText={(value) => updatePollOption(index, value)}
+                    blurOnSubmit={false}
                     maxLength={120}
                   />
                   {pollOptions.length > 2 ? (
@@ -443,6 +446,7 @@ export default function CreatePostScreen({ navigation, route }) {
             value={caption}
             onChangeText={setCaption}
             multiline
+            blurOnSubmit={false}
             maxLength={5000}
             textAlignVertical="top"
           />
