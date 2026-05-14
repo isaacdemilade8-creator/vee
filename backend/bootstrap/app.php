@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -17,8 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Allow Sanctum to work with API routes
-        $middleware->statefulApi();
+        // API clients authenticate with Sanctum bearer tokens, so keep API
+        // requests stateless and avoid requiring a database-backed session.
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+        ]);
+
+        $middleware->web(remove: [
+            StartSession::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         /*

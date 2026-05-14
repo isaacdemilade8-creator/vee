@@ -20,6 +20,8 @@ fi
 
 rm -rf public/storage
 
+php artisan config:clear || true
+
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   php artisan migrate --force
 fi
