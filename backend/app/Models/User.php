@@ -121,6 +121,11 @@ class User extends Authenticatable
         return $this->hasMany(LiveStream::class);
     }
 
+    public function pushTokens()
+    {
+        return $this->hasMany(PushToken::class);
+    }
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');

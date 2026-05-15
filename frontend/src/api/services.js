@@ -200,6 +200,14 @@ export const NotificationAPI = {
   markRead: (id) => apiClient.post(`/notifications/${id}/read`),
 };
 
+export const PushAPI = {
+  registerToken: (token, platform, deviceId = null) =>
+    apiClient.post('/push-tokens', { token, platform, device_id: deviceId }),
+
+  unregisterToken: (token) =>
+    apiClient.delete('/push-tokens', { data: { token } }),
+};
+
 export const InboxAPI = {
   getConversations: () => apiClient.get('/conversations'),
   start: (username) => apiClient.post('/conversations', { username }),

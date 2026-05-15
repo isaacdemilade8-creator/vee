@@ -57,7 +57,7 @@ module.exports = {
       },
       package: 'com.vee.app',
       softwareKeyboardLayoutMode: 'resize',
-      permissions: ['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE', 'CAMERA', 'RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS'],
+      permissions: ['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE', 'CAMERA', 'RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'POST_NOTIFICATIONS'],
     },
     web: {
       favicon: './src/assets/v.png',
@@ -67,6 +67,14 @@ module.exports = {
         'expo-image-picker',
         {
           photosPermission: 'Allow Vee to access your photos.',
+        },
+      ],
+      [
+        'expo-notifications',
+        {
+          icon: './src/assets/v.png',
+          color: '#0f766e',
+          defaultChannel: 'default',
         },
       ],
       [

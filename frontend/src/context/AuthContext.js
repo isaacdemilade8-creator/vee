@@ -15,8 +15,9 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { AuthAPI } from '../api/services';
+import { AuthAPI, PushAPI } from '../api/services';
 import { TokenStorage, setUnauthorizedCallback } from '../api/client';
+import { PushTokenStorage } from '../utils/pushTokenStorage';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -127,6 +128,15 @@ export function AuthProvider({ children }) {
    */
   const logout = useCallback(async () => {
     try {
+      try {
+        const pushToken = await PushTokenStorage.get();
+        if (pushToken) {
+          await PushAPI.unregisterToken(pushToken);
+          await PushTokenStorage.remove();
+        }
+      } catch (_) {
+        // Push cleanup should not block logout.
+      }
       await AuthAPI.logout();
     } catch (_) {
       // Even if the API call fails, we still clear local state

@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Notifications\Channels\ExpoPushChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -23,12 +24,11 @@ class LikedPostNotification extends Notification
     ) {}
 
     /**
-     * Deliver only via database channel for now.
-     * Can add 'mail', 'broadcast', or push channels later.
+     * Store in-app notifications and send push notifications to registered devices.
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', ExpoPushChannel::class];
     }
 
     /**
@@ -44,6 +44,15 @@ class LikedPostNotification extends Notification
             'post_id'     => $this->post->id,
             'post_image'  => $this->post->image_url,
             'message'     => "{$this->liker->username} liked your post.",
+        ];
+    }
+
+    public function toExpoPush(object $notifiable): array
+    {
+        return [
+            'title' => 'New like',
+            'body' => "{$this->liker->username} liked your post.",
+            'data' => $this->toDatabase($notifiable),
         ];
     }
 }

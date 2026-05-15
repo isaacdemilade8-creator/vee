@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\LiveStreamController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PushTokenController;
 use App\Http\Controllers\Api\StoryController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -137,6 +138,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications',               [NotificationController::class, 'index']);       // GET all notifications
     Route::post('/notifications/read-all',     [NotificationController::class, 'markAllRead']); // POST mark all read
     Route::post('/notifications/{id}/read',    [NotificationController::class, 'markRead']);    // POST mark one read
+    Route::post('/push-tokens',                [PushTokenController::class, 'store']);
+    Route::delete('/push-tokens',              [PushTokenController::class, 'destroy']);
 
     Route::get('/conversations', [InboxController::class, 'conversations']);
     Route::post('/conversations', [InboxController::class, 'start']);

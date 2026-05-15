@@ -18,6 +18,7 @@ const ICON_MAP = {
   like:    { name: 'heart', color: Colors.error },
   comment: { name: 'chatbubble', color: Colors.info },
   follow:  { name: 'person-add', color: Colors.success },
+  message: { name: 'chatbubbles', color: Colors.primary },
 };
 
 export default function NotificationsScreen() {

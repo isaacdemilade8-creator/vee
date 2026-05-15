@@ -7,6 +7,7 @@ use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Notifications\NewMessageNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -90,6 +91,8 @@ class InboxController extends Controller
         ]);
 
         $conversation->forceFill(['last_message_at' => $message->created_at])->save();
+        $recipient = $conversation->fresh(['userOne', 'userTwo'])->otherUser($request->user());
+        $recipient?->notify(new NewMessageNotification($request->user(), $conversation, $message));
 
         return response()->json([
             'message' => new MessageResource($message->load('sender')),

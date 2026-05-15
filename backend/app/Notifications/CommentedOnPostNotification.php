@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
+use App\Notifications\Channels\ExpoPushChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -25,7 +26,7 @@ class CommentedOnPostNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', ExpoPushChannel::class];
     }
 
     public function toDatabase(object $notifiable): array
@@ -40,6 +41,15 @@ class CommentedOnPostNotification extends Notification
             'comment_id'         => $this->comment->id,
             'comment_body'       => $this->comment->body,
             'message'            => "{$this->commenter->username} commented: \"{$this->comment->body}\"",
+        ];
+    }
+
+    public function toExpoPush(object $notifiable): array
+    {
+        return [
+            'title' => 'New comment',
+            'body' => "{$this->commenter->username}: {$this->comment->body}",
+            'data' => $this->toDatabase($notifiable),
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Notifications\Channels\ExpoPushChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -21,7 +22,7 @@ class NewFollowerNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', ExpoPushChannel::class];
     }
 
     public function toDatabase(object $notifiable): array
@@ -32,6 +33,15 @@ class NewFollowerNotification extends Notification
             'follower_username' => $this->follower->username,
             'follower_avatar'   => $this->follower->avatar_url,
             'message'           => "{$this->follower->username} started following you.",
+        ];
+    }
+
+    public function toExpoPush(object $notifiable): array
+    {
+        return [
+            'title' => 'New follower',
+            'body' => "{$this->follower->username} started following you.",
+            'data' => $this->toDatabase($notifiable),
         ];
     }
 }

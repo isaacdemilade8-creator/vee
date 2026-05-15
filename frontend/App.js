@@ -14,6 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/context/AuthContext';
 import { PreferencesProvider, usePreferences } from './src/context/PreferencesContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import { PushNotificationsProvider } from './src/providers/PushNotificationsProvider';
 
 function AppShell() {
   const { preferences } = usePreferences();
@@ -21,7 +22,9 @@ function AppShell() {
   return (
     <AuthProvider>
       <StatusBar style={preferences.theme === 'dark' ? 'light' : 'dark'} />
-      <AppNavigator />
+      <PushNotificationsProvider>
+        <AppNavigator />
+      </PushNotificationsProvider>
     </AuthProvider>
   );
 }
