@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LiveStreamCohostRequest;
+use App\Models\LiveStreamComment;
+use App\Models\LiveStreamReaction;
+use App\Models\LiveStreamViewer;
 use App\Models\LiveStream;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,19 +58,131 @@ class LiveStreamController extends Controller
 
         $user = $request->user();
         $isHost = (int) $liveStream->user_id === (int) $user->id;
-        $token = $this->makeToken($liveStream, $user, $isHost);
+        $isCohost = $this->isAcceptedCohost($liveStream, $user);
+        $role = $isHost ? 'host' : ($isCohost ? 'cohost' : 'viewer');
+        $token = $this->makeToken($liveStream, $user, $role);
 
         if (!$token) {
             return response()->json(['message' => 'Live streaming is not configured yet.'], 503);
         }
+
+        $this->touchViewer($liveStream, $user);
 
         return response()->json([
             'stream' => $this->serializeStream($liveStream->loadMissing('user')),
             'livekit' => [
                 'url' => config('livekit.url'),
                 'token' => $token,
-                'role' => $isHost ? 'host' : 'viewer',
+                'role' => $role,
             ],
+            'live' => $this->serializeLiveState($liveStream, $user),
+        ]);
+    }
+
+    public function sync(Request $request, LiveStream $liveStream): JsonResponse
+    {
+        if (!$liveStream->isActive()) {
+            return response()->json(['message' => 'This live stream has ended.'], 410);
+        }
+
+        $this->touchViewer($liveStream, $request->user());
+
+        return response()->json([
+            'stream' => $this->serializeStream($liveStream->loadMissing('user')),
+            'live' => $this->serializeLiveState($liveStream, $request->user()),
+        ]);
+    }
+
+    public function comment(Request $request, LiveStream $liveStream): JsonResponse
+    {
+        if (!$liveStream->isActive()) {
+            return response()->json(['message' => 'This live stream has ended.'], 410);
+        }
+
+        $validated = $request->validate([
+            'body' => ['required', 'string', 'max:500'],
+        ]);
+
+        $comment = LiveStreamComment::create([
+            'live_stream_id' => $liveStream->id,
+            'user_id' => $request->user()->id,
+            'body' => trim($validated['body']),
+        ])->load('user');
+
+        $this->touchViewer($liveStream, $request->user());
+
+        return response()->json([
+            'comment' => $this->serializeComment($comment),
+            'live' => $this->serializeLiveState($liveStream, $request->user()),
+        ], 201);
+    }
+
+    public function react(Request $request, LiveStream $liveStream): JsonResponse
+    {
+        if (!$liveStream->isActive()) {
+            return response()->json(['message' => 'This live stream has ended.'], 410);
+        }
+
+        $validated = $request->validate([
+            'type' => ['nullable', 'string', 'max:24'],
+        ]);
+
+        LiveStreamReaction::create([
+            'live_stream_id' => $liveStream->id,
+            'user_id' => $request->user()->id,
+            'type' => $validated['type'] ?? 'like',
+        ]);
+
+        $this->touchViewer($liveStream, $request->user());
+
+        return response()->json([
+            'live' => $this->serializeLiveState($liveStream, $request->user()),
+        ]);
+    }
+
+    public function requestCohost(Request $request, LiveStream $liveStream): JsonResponse
+    {
+        if (!$liveStream->isActive()) {
+            return response()->json(['message' => 'This live stream has ended.'], 410);
+        }
+
+        if ((int) $liveStream->user_id === (int) $request->user()->id) {
+            return response()->json(['message' => 'You are already the host.'], 422);
+        }
+
+        $cohostRequest = LiveStreamCohostRequest::updateOrCreate(
+            ['live_stream_id' => $liveStream->id, 'user_id' => $request->user()->id],
+            ['status' => 'pending', 'responded_at' => null]
+        )->load('user');
+
+        return response()->json([
+            'cohost_request' => $this->serializeCohostRequest($cohostRequest),
+            'live' => $this->serializeLiveState($liveStream, $request->user()),
+        ], 201);
+    }
+
+    public function respondCohost(Request $request, LiveStream $liveStream, LiveStreamCohostRequest $cohostRequest): JsonResponse
+    {
+        if ((int) $liveStream->user_id !== (int) $request->user()->id) {
+            return response()->json(['message' => 'Only the host can manage cohost requests.'], 403);
+        }
+
+        if ((int) $cohostRequest->live_stream_id !== (int) $liveStream->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:accepted,declined'],
+        ]);
+
+        $cohostRequest->update([
+            'status' => $validated['status'],
+            'responded_at' => now(),
+        ]);
+
+        return response()->json([
+            'cohost_request' => $this->serializeCohostRequest($cohostRequest->fresh('user')),
+            'live' => $this->serializeLiveState($liveStream, $request->user()),
         ]);
     }
 
@@ -86,7 +202,7 @@ class LiveStreamController extends Controller
         return response()->json(['stream' => $this->serializeStream($liveStream->fresh('user'))]);
     }
 
-    private function makeToken(LiveStream $stream, $user, bool $isHost): ?string
+    private function makeToken(LiveStream $stream, $user, string $role): ?string
     {
         $apiKey = config('livekit.api_key');
         $apiSecret = config('livekit.api_secret');
@@ -100,11 +216,11 @@ class LiveStreamController extends Controller
             'room' => $stream->room_name,
             'roomJoin' => true,
             'canSubscribe' => true,
-            'canPublish' => $isHost,
+            'canPublish' => in_array($role, ['host', 'cohost'], true),
             'canPublishData' => true,
         ];
 
-        if ($isHost) {
+        if (in_array($role, ['host', 'cohost'], true)) {
             $videoGrant['canPublishSources'] = ['camera', 'microphone'];
         }
 
@@ -117,7 +233,7 @@ class LiveStreamController extends Controller
             'metadata' => json_encode([
                 'user_id' => $user->id,
                 'username' => $user->username,
-                'role' => $isHost ? 'host' : 'viewer',
+                'role' => $role,
             ]),
             'video' => $videoGrant,
         ];
@@ -145,6 +261,11 @@ class LiveStreamController extends Controller
 
     private function serializeStream(LiveStream $stream): array
     {
+        $viewerCount = LiveStreamViewer::where('live_stream_id', $stream->id)
+            ->where('last_seen_at', '>=', now()->subSeconds(45))
+            ->count();
+        $reactionCount = LiveStreamReaction::where('live_stream_id', $stream->id)->count();
+
         return [
             'id' => $stream->id,
             'title' => $stream->title,
@@ -152,11 +273,96 @@ class LiveStreamController extends Controller
             'status' => $stream->status,
             'started_at' => optional($stream->started_at)->toISOString(),
             'ended_at' => optional($stream->ended_at)->toISOString(),
+            'viewer_count' => $viewerCount,
+            'reaction_count' => $reactionCount,
             'host' => [
                 'id' => $stream->user?->id,
                 'username' => $stream->user?->username,
                 'full_name' => $stream->user?->full_name,
                 'avatar_url' => $stream->user?->avatar_url,
+            ],
+        ];
+    }
+
+    private function touchViewer(LiveStream $stream, $user): void
+    {
+        LiveStreamViewer::updateOrCreate(
+            ['live_stream_id' => $stream->id, 'user_id' => $user->id],
+            ['last_seen_at' => now()]
+        );
+    }
+
+    private function isAcceptedCohost(LiveStream $stream, $user): bool
+    {
+        return LiveStreamCohostRequest::where('live_stream_id', $stream->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'accepted')
+            ->exists();
+    }
+
+    private function serializeLiveState(LiveStream $stream, $user): array
+    {
+        $comments = LiveStreamComment::with('user')
+            ->where('live_stream_id', $stream->id)
+            ->latest()
+            ->limit(40)
+            ->get()
+            ->reverse()
+            ->values()
+            ->map(fn (LiveStreamComment $comment) => $this->serializeComment($comment));
+
+        $cohostStatus = LiveStreamCohostRequest::where('live_stream_id', $stream->id)
+            ->where('user_id', $user->id)
+            ->value('status');
+
+        $pendingRequests = [];
+        if ((int) $stream->user_id === (int) $user->id) {
+            $pendingRequests = LiveStreamCohostRequest::with('user')
+                ->where('live_stream_id', $stream->id)
+                ->where('status', 'pending')
+                ->latest()
+                ->get()
+                ->map(fn (LiveStreamCohostRequest $request) => $this->serializeCohostRequest($request))
+                ->values();
+        }
+
+        return [
+            'comments' => $comments,
+            'reaction_count' => LiveStreamReaction::where('live_stream_id', $stream->id)->count(),
+            'viewer_count' => LiveStreamViewer::where('live_stream_id', $stream->id)
+                ->where('last_seen_at', '>=', now()->subSeconds(45))
+                ->count(),
+            'cohost_status' => $cohostStatus,
+            'pending_cohost_requests' => $pendingRequests,
+        ];
+    }
+
+    private function serializeComment(LiveStreamComment $comment): array
+    {
+        return [
+            'id' => $comment->id,
+            'body' => $comment->body,
+            'created_at' => optional($comment->created_at)->toISOString(),
+            'user' => [
+                'id' => $comment->user?->id,
+                'username' => $comment->user?->username,
+                'full_name' => $comment->user?->full_name,
+                'avatar_url' => $comment->user?->avatar_url,
+            ],
+        ];
+    }
+
+    private function serializeCohostRequest(LiveStreamCohostRequest $request): array
+    {
+        return [
+            'id' => $request->id,
+            'status' => $request->status,
+            'created_at' => optional($request->created_at)->toISOString(),
+            'user' => [
+                'id' => $request->user?->id,
+                'username' => $request->user?->username,
+                'full_name' => $request->user?->full_name,
+                'avatar_url' => $request->user?->avatar_url,
             ],
         ];
     }

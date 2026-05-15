@@ -28,6 +28,26 @@ class LiveStream extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(LiveStreamComment::class);
+    }
+
+    public function reactions()
+    {
+        return $this->hasMany(LiveStreamReaction::class);
+    }
+
+    public function viewers()
+    {
+        return $this->hasMany(LiveStreamViewer::class);
+    }
+
+    public function cohostRequests()
+    {
+        return $this->hasMany(LiveStreamCohostRequest::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

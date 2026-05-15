@@ -223,6 +223,11 @@ export const LiveAPI = {
   getActive: () => apiClient.get('/live-streams'),
   start: (title = null) => apiClient.post('/live-streams', { title }),
   join: (streamId) => apiClient.post(`/live-streams/${streamId}/join`),
+  sync: (streamId) => apiClient.get(`/live-streams/${streamId}/sync`),
+  comment: (streamId, body) => apiClient.post(`/live-streams/${streamId}/comments`, { body }),
+  react: (streamId, type = 'like') => apiClient.post(`/live-streams/${streamId}/reactions`, { type }),
+  requestCohost: (streamId) => apiClient.post(`/live-streams/${streamId}/cohost-requests`),
+  respondCohost: (streamId, requestId, status) => apiClient.post(`/live-streams/${streamId}/cohost-requests/${requestId}`, { status }),
   end: (streamId) => apiClient.post(`/live-streams/${streamId}/end`),
 };
 

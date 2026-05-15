@@ -152,6 +152,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/live-streams', [LiveStreamController::class, 'index']);
     Route::post('/live-streams', [LiveStreamController::class, 'start']);
     Route::post('/live-streams/{liveStream}/join', [LiveStreamController::class, 'join']);
+    Route::get('/live-streams/{liveStream}/sync', [LiveStreamController::class, 'sync']);
+    Route::post('/live-streams/{liveStream}/comments', [LiveStreamController::class, 'comment']);
+    Route::post('/live-streams/{liveStream}/reactions', [LiveStreamController::class, 'react']);
+    Route::post('/live-streams/{liveStream}/cohost-requests', [LiveStreamController::class, 'requestCohost']);
+    Route::post('/live-streams/{liveStream}/cohost-requests/{cohostRequest}', [LiveStreamController::class, 'respondCohost']);
     Route::post('/live-streams/{liveStream}/end', [LiveStreamController::class, 'end']);
 
     Route::get('/discover/categories', [DiscoveryController::class, 'categories']);

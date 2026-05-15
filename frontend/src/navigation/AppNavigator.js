@@ -26,6 +26,7 @@ import StoryViewerScreen from '../screens/main/StoryViewerScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import PostAnalyticsScreen from '../screens/main/PostAnalyticsScreen';
 import LiveScreen from '../screens/main/LiveScreen';
+import FollowListScreen from '../screens/main/FollowListScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -90,6 +91,7 @@ function HomeStack() {
         })} />
       <Stack.Screen name="Comments" component={CommentsScreen} options={{ title: 'Comments' }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
+      <Stack.Screen name="FollowList" component={FollowListScreen} options={{ title: '' }} />
       <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ headerShown: false }} />
       <Stack.Screen name="PostAnalytics" component={PostAnalyticsScreen} options={{ title: 'Post analytics' }} />
       <Stack.Screen name="Live" component={LiveScreen} options={{ title: 'Live' }} />
@@ -103,6 +105,7 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.surface }, headerTintColor: colors.textPrimary, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="MyProfile" component={ProfileScreen} options={{ title: 'Profile' }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
+      <Stack.Screen name="FollowList" component={FollowListScreen} options={{ title: '' }} />
       <Stack.Screen name="Comments" component={CommentsScreen} options={{ title: 'Comments' }} />
       <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
       <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ headerShown: false }} />
@@ -119,6 +122,7 @@ function InboxStack() {
       <Stack.Screen name="Chat" component={ChatScreen} options={{ title: '' }} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Activity' }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
+      <Stack.Screen name="FollowList" component={FollowListScreen} options={{ title: '' }} />
       <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Comments" component={CommentsScreen} options={{ title: 'Comments' }} />
     </Stack.Navigator>
@@ -131,6 +135,7 @@ function SearchStack() {
     <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.surface }, headerTintColor: colors.textPrimary, headerShadowVisible: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="Search" component={SearchScreen} options={{ title: 'Explore' }} />
       <Stack.Screen name="UserProfile" component={UserProfileScreen} options={{ title: '' }} />
+      <Stack.Screen name="FollowList" component={FollowListScreen} options={{ title: '' }} />
       <Stack.Screen name="Comments" component={CommentsScreen} options={{ title: 'Comments' }} />
       <Stack.Screen name="StoryViewer" component={StoryViewerScreen} options={{ headerShown: false }} />
       <Stack.Screen name="PostAnalytics" component={PostAnalyticsScreen} options={{ title: 'Post analytics' }} />

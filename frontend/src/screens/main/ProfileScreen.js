@@ -180,6 +180,11 @@ export default function ProfileScreen({ navigation }) {
     );
   }, [logout]);
 
+  const openFollowList = (type) => {
+    if (!user?.username) return;
+    navigation.navigate('FollowList', { username: user.username, type });
+  };
+
   const Header = () => (
     <View style={[styles.headerWrap, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
       <TouchableOpacity style={[styles.cover, { backgroundColor: colors.surfaceMuted || '#18212F' }]} onPress={handleCoverChange} activeOpacity={0.9}>
@@ -242,8 +247,12 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={styles.statsRow}>
           <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{posts.length}</Text> Posts</Text>
-          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{user?.followers_count ?? 0}</Text> Followers</Text>
-          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{user?.following_count ?? 0}</Text> Following</Text>
+          <TouchableOpacity onPress={() => openFollowList('followers')} activeOpacity={0.75}>
+            <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{user?.followers_count ?? 0}</Text> Followers</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => openFollowList('following')} activeOpacity={0.75}>
+            <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{user?.following_count ?? 0}</Text> Following</Text>
+          </TouchableOpacity>
         </View>
 
         {editMode ? (

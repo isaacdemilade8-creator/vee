@@ -119,6 +119,11 @@ export default function UserProfileScreen({ route, navigation }) {
     setReposts((prev) => prev.filter((post) => post.id !== postId));
   }, []);
 
+  const openFollowList = (type) => {
+    if (!profile?.username) return;
+    navigation.navigate('FollowList', { username: profile.username, type });
+  };
+
   if (loading && !profile) {
     return <ActivityIndicator size="large" color={colors.primary} style={[styles.loader, { backgroundColor: colors.background }]} />;
   }
@@ -148,8 +153,12 @@ export default function UserProfileScreen({ route, navigation }) {
 
         <View style={styles.statsRow}>
           <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{posts.length}</Text> Posts</Text>
-          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{profile.followers_count}</Text> Followers</Text>
-          <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{profile.following_count}</Text> Following</Text>
+          <TouchableOpacity onPress={() => openFollowList('followers')} activeOpacity={0.75}>
+            <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{profile.followers_count}</Text> Followers</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => openFollowList('following')} activeOpacity={0.75}>
+            <Text style={[styles.statText, { color: colors.textSecondary }]}><Text style={[styles.statValue, { color: colors.textPrimary }]}>{profile.following_count}</Text> Following</Text>
+          </TouchableOpacity>
         </View>
 
         {!isOwnProfile ? (
