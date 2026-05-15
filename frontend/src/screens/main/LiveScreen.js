@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { AudioSession, isTrackReference, LiveKitRoom, useTracks, VideoTrack } from '@livekit/react-native';
+import { mediaDevices } from '@livekit/react-native-webrtc';
 import { Track } from 'livekit-client';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,13 +21,25 @@ import { LiveAPI } from '../../api/services';
 import Avatar from '../../components/common/Avatar';
 import { BorderRadius, Colors, Spacing, Typography, useAppTheme } from '../../utils/theme';
 
-function RoomView({ colors }) {
+async function ensureBroadcastPermissions() {
+  const stream = await mediaDevices.getUserMedia({ audio: true, video: true });
+  stream.getTracks().forEach((track) => track.stop());
+}
+
+function RoomView({ colors, canBroadcast }) {
   const tracks = useTracks([Track.Source.Camera]);
 
   const renderTrack = useCallback(({ item }) => {
     const tileStyle = [styles.videoTile, tracks.length > 1 && styles.videoTileGrid];
     if (isTrackReference(item)) {
-      return <VideoTrack trackRef={item} style={tileStyle} />;
+      return (
+        <VideoTrack
+          trackRef={item}
+          style={StyleSheet.flatten(tileStyle)}
+          mirror={item.participant?.isLocal}
+          objectFit="cover"
+        />
+      );
     }
 
     return (
@@ -44,6 +57,15 @@ function RoomView({ colors }) {
       numColumns={tracks.length > 1 ? 2 : 1}
       key={tracks.length > 1 ? 'grid' : 'single'}
       contentContainerStyle={styles.roomGrid}
+      ListEmptyComponent={
+        <View style={styles.videoEmptyState}>
+          <ActivityIndicator color={Colors.white} />
+          <Text style={styles.videoEmptyTitle}>{canBroadcast ? 'Starting camera...' : 'Waiting for video...'}</Text>
+          <Text style={styles.videoEmptyText}>
+            {canBroadcast ? 'If this stays dark, check camera and microphone permissions.' : 'The host has not published video yet.'}
+          </Text>
+        </View>
+      }
     />
   );
 }
@@ -93,13 +115,14 @@ export default function LiveScreen({ navigation }) {
   const startLive = async () => {
     setBusy(true);
     try {
+      await ensureBroadcastPermissions();
       const res = await LiveAPI.start(title.trim() || null);
       autoRejoinRef.current = false;
       setSession(res.data);
       setLiveState(res.data.live || { comments: [], reaction_count: 0, viewer_count: 0, pending_cohost_requests: [] });
       setTitle('');
     } catch (err) {
-      Alert.alert('Could not start live', err.response?.data?.message || err.message || 'Check LiveKit configuration.');
+      Alert.alert('Could not start live', err.response?.data?.message || err.message || 'Please allow camera and microphone access, then try again.');
     } finally {
       setBusy(false);
     }
@@ -243,7 +266,7 @@ export default function LiveScreen({ navigation }) {
           video={canBroadcast}
           options={{ adaptiveStream: { pixelDensity: 'screen' } }}
         >
-          <RoomView colors={colors} />
+          <RoomView colors={colors} canBroadcast={canBroadcast} />
         </LiveKitRoom>
         <View style={styles.liveOverlay}>
           <View style={styles.liveInfo}>
@@ -423,6 +446,9 @@ const styles = StyleSheet.create({
   videoTile: { width: '100%', minHeight: 260, flex: 1, backgroundColor: Colors.black },
   videoTileGrid: { width: '50%' },
   videoPlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  videoEmptyState: { flex: 1, minHeight: 520, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.xl },
+  videoEmptyTitle: { color: Colors.white, fontSize: Typography.base, fontWeight: '900', marginTop: Spacing.md },
+  videoEmptyText: { color: 'rgba(255,255,255,0.68)', fontSize: Typography.sm, fontWeight: '600', textAlign: 'center', marginTop: 6, lineHeight: 18 },
   liveOverlay: { position: 'absolute', left: Spacing.md, right: Spacing.md, top: Spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   liveInfo: { flex: 1, marginRight: Spacing.md },
   livePill: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(225,48,108,0.92)', borderRadius: BorderRadius.full, paddingHorizontal: Spacing.sm, height: 26, gap: 6 },
