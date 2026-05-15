@@ -42,7 +42,7 @@ class PostResource extends JsonResource
             'comments_count' => $this->comments()->count(),
             'shares_count'   => $this->shares()->count(),
             'reposts_count'  => $this->reposts()->count(),
-            'views_count'    => $this->views()->count(),
+            'views_count'    => $this->views()->where('user_id', '!=', $this->user_id)->count(),
 
             // Has the authenticated user liked this post?
             'is_liked'       => $authUser

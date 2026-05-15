@@ -93,6 +93,21 @@ class LiveStreamController extends Controller
         ]);
     }
 
+    public function viewers(Request $request, LiveStream $liveStream): JsonResponse
+    {
+        if (!$liveStream->isActive()) {
+            return response()->json(['message' => 'This live stream has ended.'], 410);
+        }
+
+        $this->touchViewer($liveStream, $request->user());
+
+        return response()->json([
+            'viewers' => $this->activeViewers($liveStream),
+            'guests' => $this->acceptedGuests($liveStream),
+            'viewer_count' => $this->viewerCount($liveStream),
+        ]);
+    }
+
     public function comment(Request $request, LiveStream $liveStream): JsonResponse
     {
         if (!$liveStream->isActive()) {
@@ -261,9 +276,6 @@ class LiveStreamController extends Controller
 
     private function serializeStream(LiveStream $stream): array
     {
-        $viewerCount = LiveStreamViewer::where('live_stream_id', $stream->id)
-            ->where('last_seen_at', '>=', now()->subSeconds(45))
-            ->count();
         $reactionCount = LiveStreamReaction::where('live_stream_id', $stream->id)->count();
 
         return [
@@ -273,7 +285,7 @@ class LiveStreamController extends Controller
             'status' => $stream->status,
             'started_at' => optional($stream->started_at)->toISOString(),
             'ended_at' => optional($stream->ended_at)->toISOString(),
-            'viewer_count' => $viewerCount,
+            'viewer_count' => $this->viewerCount($stream),
             'reaction_count' => $reactionCount,
             'host' => [
                 'id' => $stream->user?->id,
@@ -286,6 +298,10 @@ class LiveStreamController extends Controller
 
     private function touchViewer(LiveStream $stream, $user): void
     {
+        if ((int) $stream->user_id === (int) $user->id) {
+            return;
+        }
+
         LiveStreamViewer::updateOrCreate(
             ['live_stream_id' => $stream->id, 'user_id' => $user->id],
             ['last_seen_at' => now()]
@@ -294,6 +310,10 @@ class LiveStreamController extends Controller
 
     private function isAcceptedCohost(LiveStream $stream, $user): bool
     {
+        if (!$user) {
+            return false;
+        }
+
         return LiveStreamCohostRequest::where('live_stream_id', $stream->id)
             ->where('user_id', $user->id)
             ->where('status', 'accepted')
@@ -329,12 +349,50 @@ class LiveStreamController extends Controller
         return [
             'comments' => $comments,
             'reaction_count' => LiveStreamReaction::where('live_stream_id', $stream->id)->count(),
-            'viewer_count' => LiveStreamViewer::where('live_stream_id', $stream->id)
-                ->where('last_seen_at', '>=', now()->subSeconds(45))
-                ->count(),
+            'viewer_count' => $this->viewerCount($stream),
+            'viewers' => $this->activeViewers($stream),
             'cohost_status' => $cohostStatus,
             'pending_cohost_requests' => $pendingRequests,
+            'accepted_guests' => $this->acceptedGuests($stream),
         ];
+    }
+
+    private function viewerCount(LiveStream $stream): int
+    {
+        return LiveStreamViewer::where('live_stream_id', $stream->id)
+            ->where('user_id', '!=', $stream->user_id)
+            ->where('last_seen_at', '>=', now()->subSeconds(45))
+            ->count();
+    }
+
+    private function activeViewers(LiveStream $stream)
+    {
+        return LiveStreamViewer::with('user')
+            ->where('live_stream_id', $stream->id)
+            ->where('user_id', '!=', $stream->user_id)
+            ->where('last_seen_at', '>=', now()->subSeconds(45))
+            ->latest('last_seen_at')
+            ->get()
+            ->map(fn (LiveStreamViewer $viewer) => [
+                'id' => $viewer->user?->id,
+                'username' => $viewer->user?->username,
+                'full_name' => $viewer->user?->full_name,
+                'avatar_url' => $viewer->user?->avatar_url,
+                'is_guest' => $this->isAcceptedCohost($stream, $viewer->user),
+                'last_seen_at' => optional($viewer->last_seen_at)->toISOString(),
+            ])
+            ->values();
+    }
+
+    private function acceptedGuests(LiveStream $stream)
+    {
+        return LiveStreamCohostRequest::with('user')
+            ->where('live_stream_id', $stream->id)
+            ->where('status', 'accepted')
+            ->latest('responded_at')
+            ->get()
+            ->map(fn (LiveStreamCohostRequest $request) => $this->serializeCohostRequest($request))
+            ->values();
     }
 
     private function serializeComment(LiveStreamComment $comment): array

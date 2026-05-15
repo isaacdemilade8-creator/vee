@@ -165,7 +165,7 @@ class PostController extends Controller
         $this->markViewedBy($post, $request->user()->id);
 
         return response()->json([
-            'views_count' => $post->views()->count(),
+            'views_count' => $this->viewsCount($post),
         ]);
     }
 
@@ -251,7 +251,7 @@ class PostController extends Controller
                 'comments' => $post->comments()->count(),
                 'shares' => $post->shares()->count(),
                 'reposts' => $post->reposts()->count(),
-                'views' => $post->views()->count(),
+                'views' => $this->viewsCount($post),
                 'engagements' => $post->likes()->count()
                     + $post->comments()->count()
                     + $post->shares()->count()
@@ -322,10 +322,21 @@ class PostController extends Controller
 
     private function markViewedBy(Post $post, int $userId): void
     {
+        if ((int) $post->user_id === (int) $userId) {
+            return;
+        }
+
         PostView::firstOrCreate([
             'post_id' => $post->id,
             'user_id' => $userId,
         ]);
+    }
+
+    private function viewsCount(Post $post): int
+    {
+        return $post->views()
+            ->where('user_id', '!=', $post->user_id)
+            ->count();
     }
 
     private function guessCategory(string $tag): string
